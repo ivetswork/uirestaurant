@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Restaurante Oliva - QRs Mesas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F8F5EE] p-8 text-[#2C302E]">
+
+  <div class="max-w-5xl mx-auto mb-8 flex justify-between items-center print:hidden">
+    <div>
+      <h1 class="text-2xl font-bold text-[#1E3A2B]">Códigos QR - Restaurante Oliva</h1>
+      <p class="text-sm text-[#736A5E]">Generados para imprimir y colocar en soportes de metacrilato.</p>
+    </div>
+    <button onclick="window.print()" class="bg-[#1E3A2B] text-white font-bold px-6 py-2.5 rounded-xl shadow hover:bg-[#2D4F3B]">
+      🖨️ Imprimir / Guardar en PDF
+    </button>
+  </div>
+
+  <div id="qrGrid" class="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+
+  <script>
+    // SUSTITUYE ESTA URL BASE POR TU ENLACE FINAL PUBLICADO:
+    const BASE_URL = "https://tu-usuario.github.io/restaurante-oliva/index.html";
+    const totalMesas = 15;
+    const grid = document.getElementById('qrGrid');
+
+    let html = '';
+    for (let i = 1; i <= totalMesas; i++) {
+      const mesaNombre = `Mesa ${i}`;
+      const targetUrl = `${BASE_URL}?mesa=${encodeURIComponent(mesaNombre)}`;
+      const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(targetUrl)}&color=1E-3A-2B`;
+
+      html += `
+        <div class="bg-white border-2 border-[#E0D7C6] rounded-3xl p-6 flex flex-col items-center text-center shadow-sm break-inside-avoid">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xl">🫒</span>
+            <span class="font-serif font-bold text-lg text-[#1E3A2B]">Restaurante Oliva</span>
+          </div>
+          <p class="text-xs text-[#8C8275] mb-4">Escanea para ver la carta y pedir</p>
+          <img src="${qrApiUrl}" alt="QR ${mesaNombre}" class="w-44 h-44 rounded-xl border border-[#EBE5D8] p-2 bg-[#FDFBF7] mb-4">
+          <span class="bg-[#EAE3D2] text-[#1E3A2B] font-extrabold text-sm px-4 py-1.5 rounded-full">
+            ${mesaNombre}
+          </span>
+        </div>
+      `;
+    }
+    grid.innerHTML = html;
+  </script>
+</body>
+</html>
