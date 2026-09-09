@@ -24,9 +24,11 @@
           <span>📍</span> Detectando mesa...
         </p>
       </div>
-      <div class="w-10 h-10 rounded-full bg-[#2D4F3B] flex items-center justify-center text-xl shadow-inner">
-        🫒
-      </div>
+      <!-- Botón para ver la cuenta acumulada de la mesa -->
+      <button onclick="openBillModal()" class="bg-[#2D4F3B] hover:bg-[#3D6850] text-[#FDFBF7] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm border border-[#3D6850] transition-all active:scale-95">
+        <span>🧾</span>
+        <span>Mi Cuenta</span>
+      </button>
     </div>
   </header>
 
@@ -34,9 +36,10 @@
     <!-- Selector de Categorías -->
     <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none" id="categoriesBar">
       <button onclick="filterCategory('Todos')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-[#1E3A2B] text-[#FDFBF7] shadow-sm transition-all">Todos</button>
-      <button onclick="filterCategory('Tapas')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Tapas</button>
-      <button onclick="filterCategory('Raciones')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Raciones</button>
       <button onclick="filterCategory('Bebidas')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Bebidas</button>
+      <button onclick="filterCategory('Tapas')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Tapas</button>
+      <button onclick="filterCategory('Raciones')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Raciones / Platos</button>
+      <button onclick="filterCategory('Postres')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Postres</button>
     </div>
 
     <!-- Contenedor de Platos -->
@@ -44,7 +47,7 @@
     <div id="productList" class="grid grid-cols-1 gap-3.5 hidden"></div>
   </main>
 
-  <!-- Barra flotante de Carrito -->
+  <!-- Barra flotante de Carrito Activo -->
   <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-[#FDFBF7]/95 backdrop-blur-md border-t border-[#EBE5D8] p-4 shadow-xl hidden z-30">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div>
@@ -58,33 +61,65 @@
     </div>
   </div>
 
-  <!-- Modal de Pedido -->
+  <!-- Modal de Pedido en curso (Carrito) -->
   <div id="orderModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-[#FDFBF7] rounded-t-3xl sm:rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[85vh] overflow-y-auto border border-[#EBE5D8]">
       <div class="flex justify-between items-center pb-2 border-b border-[#EBE5D8]">
-        <h2 class="font-serif-title font-bold text-xl text-[#1E3A2B]">Tu Pedido</h2>
+        <h2 class="font-serif-title font-bold text-xl text-[#1E3A2B]">Tu Selección</h2>
         <button onclick="closeModal()" class="text-[#8C8275] hover:text-[#1E3A2B] text-2xl font-bold">&times;</button>
       </div>
+      
       <div id="modalItems" class="divide-y divide-[#EBE5D8] text-sm"></div>
+
       <div>
         <label class="block text-xs font-bold text-[#1E3A2B] uppercase tracking-wider mb-1.5">Notas especiales para barra/cocina:</label>
-        <textarea id="orderNotes" rows="2" placeholder="Ej. Sin hielo en las bebidas, bravas muy tostadas..." class="w-full bg-white border border-[#DCD5C5] rounded-xl p-3 text-sm outline-none focus:border-[#1E3A2B] focus:ring-1 focus:ring-[#1E3A2B] text-[#2C302E]"></textarea>
+        <textarea id="orderNotes" rows="2" placeholder="Ej. Sin hielo en las bebidas, salsa aparte..." class="w-full bg-white border border-[#DCD5C5] rounded-xl p-3 text-sm outline-none focus:border-[#1E3A2B] focus:ring-1 focus:ring-[#1E3A2B] text-[#2C302E]"></textarea>
       </div>
       <button id="sendBtn" onclick="submitOrder()" class="w-full bg-[#1E3A2B] hover:bg-[#2D4F3B] text-[#FDFBF7] font-bold py-3.5 rounded-xl shadow-md transition-transform active:scale-98">
-        Confirmar y Enviar Pedido
+        Confirmar y Enviar a Cocina
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal de Cuenta Acumulada de la Mesa -->
+  <div id="billModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-[#FDFBF7] rounded-t-3xl sm:rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[85vh] overflow-y-auto border border-[#EBE5D8]">
+      <div class="flex justify-between items-center pb-2 border-b border-[#EBE5D8]">
+        <div>
+          <h2 class="font-serif-title font-bold text-xl text-[#1E3A2B]">Cuenta de la Mesa</h2>
+          <p class="text-xs text-[#8C8275]" id="billMesaTitle">Historial de pedidos activos</p>
+        </div>
+        <button onclick="closeBillModal()" class="text-[#8C8275] hover:text-[#1E3A2B] text-2xl font-bold">&times;</button>
+      </div>
+      
+      <div id="billContent" class="text-sm space-y-3">
+        <p class="text-center py-6 text-gray-500">Consultando consumo...</p>
+      </div>
+
+      <div class="border-t border-[#EBE5D8] pt-3 flex justify-between items-center">
+        <span class="font-extrabold text-sm text-[#1E3A2B] uppercase tracking-wider">Total Acumulado</span>
+        <span id="billGrandTotal" class="text-xl font-black text-[#8B2635]">0.00 €</span>
+      </div>
+
+      <button onclick="closeBillModal()" class="w-full bg-[#EAE3D2] hover:bg-[#DFD6C2] text-[#1E3A2B] font-bold py-3 rounded-xl transition-all">
+        Volver a la Carta
       </button>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwNcXq1xYbo5Zm68ZGIrENIuac6FwIsp_wV00KHPG075hY3Hv-ZOcaYR6jF2tvdGAqf/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyz7V5nxJFw8Khi_c9L-KrgXvozY058e7yBSrnes6IkaAX4boZXOsC2BIWVYQMc1khG/exec";
 
     let products = [];
     let cart = {};
+    let currentCategory = 'Todos';
+
     const urlParams = new URLSearchParams(window.location.search);
-    const mesaActual = urlParams.get('mesa') || 'Mesa 1';
+    let mesaParam = urlParams.get('mesa') || 'Mesa 1';
+    const mesaActual = decodeURIComponent(mesaParam).replace('!', '').trim();
 
     document.getElementById('mesaBadge').innerHTML = `<span>📍</span> ${mesaActual}`;
+    document.getElementById('billMesaTitle').innerText = `${mesaActual} • Consumo activo`;
 
     async function loadProducts() {
       try {
@@ -92,20 +127,33 @@
         products = await res.json();
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('productList').classList.remove('hidden');
-        renderProducts(products);
+        renderCurrentView();
       } catch (e) {
         document.getElementById('loading').innerText = 'No se ha podido cargar la carta. Revisa la conexión.';
       }
     }
 
+    function renderCurrentView() {
+      let filtered = products;
+      if (currentCategory !== 'Todos') {
+        filtered = products.filter(p => {
+          const cat = (p.Categoria || p.categoria || '').toLowerCase();
+          if (currentCategory === 'Raciones') return cat.includes('racion') || cat.includes('plato') || cat.includes('principal');
+          return cat.includes(currentCategory.toLowerCase());
+        });
+      }
+      renderProducts(filtered);
+    }
+
     function renderProducts(list) {
       const container = document.getElementById('productList');
       container.innerHTML = list.map(p => {
-        const id = p.ID_Producto || p.id_producto || p.Nombre;
+        const id = String(p.ID_Producto || p.id_producto || p.Nombre);
         const nombre = p.Nombre || p.nombre || '';
         const desc = p.Descripcion || p.descripcion || '';
         const precio = parseFloat(p.Precio || p.precio || 0).toFixed(2);
         const img = p.Imagen || p.imagen || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
+        const qty = cart[id] || 0;
 
         return `
           <div class="bg-white rounded-2xl p-3.5 flex gap-3.5 items-center border border-[#EBE5D8] shadow-sm hover:border-[#D4C9B4] transition-all">
@@ -115,36 +163,68 @@
               <p class="text-xs text-[#736A5E] line-clamp-2 my-1 leading-relaxed">${desc}</p>
               <p class="font-extrabold text-[#8B2635] text-sm">${precio} €</p>
             </div>
-            <button onclick="addToCart('${id}')" class="bg-[#F4EFE6] hover:bg-[#8B2635] hover:text-white text-[#1E3A2B] font-bold px-3 py-2 rounded-xl text-xs transition-all active:scale-95 flex-shrink-0">
-              + Añadir
-            </button>
+            
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              ${qty > 0 ? `
+                <button onclick="modifyQty('${encodeURIComponent(id)}', -1)" class="w-8 h-8 rounded-lg bg-[#F4EFE6] text-[#8B2635] font-extrabold flex items-center justify-center text-base hover:bg-[#EBE5D8] transition-all active:scale-95">
+                  −
+                </button>
+                <span class="text-xs font-bold text-[#1E3A2B] w-5 text-center">${qty}</span>
+                <button onclick="modifyQty('${encodeURIComponent(id)}', 1)" class="w-8 h-8 rounded-lg bg-[#1E3A2B] text-white font-extrabold flex items-center justify-center text-base hover:bg-[#2D4F3B] transition-all active:scale-95">
+                  +
+                </button>
+              ` : `
+                <button onclick="modifyQty('${encodeURIComponent(id)}', 1)" class="bg-[#F4EFE6] hover:bg-[#1E3A2B] hover:text-white text-[#1E3A2B] font-bold px-3 py-2 rounded-xl text-xs transition-all active:scale-95">
+                  + Añadir
+                </button>
+              `}
+            </div>
           </div>
         `;
       }).join('');
     }
 
     function filterCategory(cat) {
+      currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.classList.remove('bg-[#1E3A2B]', 'text-[#FDFBF7]');
         btn.classList.add('bg-white', 'text-[#1E3A2B]', 'border', 'border-[#EBE5D8]');
-        if (btn.innerText.toUpperCase() === cat.toUpperCase()) {
+        if (btn.innerText.toUpperCase().startsWith(cat.toUpperCase().substring(0, 4))) {
           btn.classList.remove('bg-white', 'text-[#1E3A2B]', 'border', 'border-[#EBE5D8]');
           btn.classList.add('bg-[#1E3A2B]', 'text-[#FDFBF7]');
         }
       });
-      if (cat === 'Todos') renderProducts(products);
-      else renderProducts(products.filter(p => (p.Categoria || p.categoria) === cat));
+      renderCurrentView();
     }
 
-    function addToCart(id) {
-      cart[id] = (cart[id] || 0) + 1;
+    function modifyQty(encodedId, delta) {
+      const id = decodeURIComponent(encodedId);
+      const current = cart[id] || 0;
+      const next = current + delta;
+
+      if (next > 0) cart[id] = next;
+      else delete cart[id];
+
       updateCartUI();
+      renderCurrentView();
+
+      if (!document.getElementById('orderModal').classList.contains('hidden')) {
+        renderModalList();
+      }
+    }
+
+    function deleteItem(encodedId) {
+      const id = decodeURIComponent(encodedId);
+      delete cart[id];
+      updateCartUI();
+      renderCurrentView();
+      renderModalList();
     }
 
     function updateCartUI() {
       let count = 0, total = 0;
       Object.keys(cart).forEach(id => {
-        const item = products.find(p => (p.ID_Producto || p.id_producto || p.Nombre) === id);
+        const item = products.find(p => String(p.ID_Producto || p.id_producto || p.Nombre) === id);
         if (item) {
           count += cart[id];
           total += cart[id] * parseFloat(item.Precio || item.precio || 0);
@@ -157,27 +237,114 @@
         document.getElementById('cartTotal').innerText = `${total.toFixed(2)} €`;
       } else {
         bar.classList.add('hidden');
+        closeModal();
       }
     }
 
-    function openModal() {
-      const modal = document.getElementById('orderModal');
+    function renderModalList() {
       const list = document.getElementById('modalItems');
-      list.innerHTML = Object.keys(cart).map(id => {
-        const p = products.find(prod => (prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
-        const precio = parseFloat(p.Precio || p.precio || 0);
+      const activeKeys = Object.keys(cart);
+
+      if (activeKeys.length === 0) {
+        closeModal();
+        return;
+      }
+
+      list.innerHTML = activeKeys.map(id => {
+        const p = products.find(prod => String(prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
+        const precio = parseFloat(p ? (p.Precio || p.precio || 0) : 0);
+        const encoded = encodeURIComponent(id);
+
         return `
-          <div class="py-2.5 flex justify-between items-center">
-            <span class="font-medium text-[#1E3A2B]">${cart[id]}x ${p.Nombre || p.nombre}</span>
-            <span class="font-bold text-[#8B2635]">${(cart[id] * precio).toFixed(2)} €</span>
+          <div class="py-3 flex justify-between items-center gap-2">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-[#1E3A2B] truncate">${p ? (p.Nombre || p.nombre) : id}</p>
+              <p class="text-xs text-[#8B2635] font-bold">${(cart[id] * precio).toFixed(2)} €</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button onclick="modifyQty('${encoded}', -1)" class="w-7 h-7 rounded-lg bg-[#FAF7F0] border border-[#E0D7C6] text-[#8B2635] font-extrabold flex items-center justify-center hover:bg-[#F0EAE1]">
+                −
+              </button>
+              <span class="text-xs font-bold text-[#1E3A2B] w-4 text-center">${cart[id]}</span>
+              <button onclick="modifyQty('${encoded}', 1)" class="w-7 h-7 rounded-lg bg-[#FAF7F0] border border-[#E0D7C6] text-[#1E3A2B] font-extrabold flex items-center justify-center hover:bg-[#F0EAE1]">
+                +
+              </button>
+              <button onclick="deleteItem('${encoded}')" title="Eliminar plato" class="ml-2 text-xs text-[#8C8275] hover:text-[#8B2635] p-1 font-bold">
+                ✕
+              </button>
+            </div>
           </div>
         `;
       }).join('');
-      modal.classList.remove('hidden');
+    }
+
+    function openModal() {
+      renderModalList();
+      document.getElementById('orderModal').classList.remove('hidden');
     }
 
     function closeModal() {
       document.getElementById('orderModal').classList.add('hidden');
+    }
+
+    // Modal de Cuenta Acumulada
+    async function openBillModal() {
+      const modal = document.getElementById('billModal');
+      const content = document.getElementById('billContent');
+      const totalDisplay = document.getElementById('billGrandTotal');
+
+      modal.classList.remove('hidden');
+      content.innerHTML = '<p class="text-center py-6 text-gray-500">Consultando comanda activa...</p>';
+      totalDisplay.innerText = '0.00 €';
+
+      try {
+        const res = await fetch(`${API_URL}?action=getCuentaMesa&mesa=${encodeURIComponent(mesaActual)}`, { redirect: 'follow' });
+        const orders = await res.json();
+
+        if (!Array.isArray(orders) || orders.length === 0) {
+          content.innerHTML = `
+            <div class="text-center py-8 text-[#8C8275]">
+              <p class="text-3xl mb-1">🍽️</p>
+              <p class="font-bold text-[#1E3A2B]">No hay consumos pendientes</p>
+              <p class="text-xs mt-1">Tus nuevos pedidos confirmados aparecerán aquí.</p>
+            </div>
+          `;
+          totalDisplay.innerText = '0.00 €';
+          return;
+        }
+
+        let grandTotal = 0;
+        content.innerHTML = orders.map((ord, idx) => {
+          const ordTotal = parseFloat(ord.Total || ord.total || 0);
+          grandTotal += ordTotal;
+          const rawItems = (ord.Resumen_Platos || ord.resumen_platos || '').split('|');
+          const hora = (ord.Fecha_Hora || ord.fecha_hora || '').split(' ')[1] || '';
+
+          return `
+            <div class="bg-white border border-[#EBE5D8] rounded-2xl p-3.5 shadow-xs">
+              <div class="flex justify-between items-center border-b border-[#F0EAE1] pb-2 mb-2">
+                <span class="text-xs font-bold text-[#1E3A2B]">Ronda #${idx + 1} (${hora})</span>
+                <span class="text-xs font-extrabold text-[#8B2635]">${ordTotal.toFixed(2)} €</span>
+              </div>
+              <ul class="text-xs text-[#595247] space-y-1">
+                ${rawItems.map(item => {
+                  const cleanItem = item.replace(/\[.*?\]/, '').trim();
+                  return cleanItem ? `<li>• ${cleanItem}</li>` : '';
+                }).join('')}
+              </ul>
+            </div>
+          `;
+        }).join('');
+
+        totalDisplay.innerText = `${grandTotal.toFixed(2)} €`;
+      } catch (err) {
+        content.innerHTML = '<p class="text-center py-4 text-red-500 text-xs">Error al cargar la cuenta. Inténtalo de nuevo.</p>';
+      }
+    }
+
+    function closeBillModal() {
+      document.getElementById('billModal').classList.add('hidden');
     }
 
     async function submitOrder() {
@@ -185,20 +352,23 @@
       btn.disabled = true;
       btn.innerText = 'Enviando comanda a cocina...';
 
-      const items = Object.keys(cart).map(id => {
-        const p = products.find(prod => (prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
-        return `${cart[id]}x ${p.Nombre || p.nombre}`;
-      }).join(', ');
+      const structuredItems = Object.keys(cart).map(id => {
+        const p = products.find(prod => String(prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
+        const name = p ? (p.Nombre || p.nombre) : id;
+        const cat = p ? (p.Categoria || p.categoria || 'Tapas') : 'Tapas';
+        return `[${cat}] ${cart[id]}x ${name}`;
+      }).join(' | ');
 
       const total = Object.keys(cart).reduce((sum, id) => {
-        const p = products.find(prod => (prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
-        return sum + (cart[id] * parseFloat(p.Precio || p.precio || 0));
+        const p = products.find(prod => String(prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
+        const price = p ? parseFloat(p.Precio || p.precio || 0) : 0;
+        return sum + (cart[id] * price);
       }, 0);
 
       const payload = {
         action: 'crearPedido',
         mesa: mesaActual,
-        resumen: items,
+        resumen: structuredItems,
         total: total.toFixed(2),
         notas: document.getElementById('orderNotes').value
       };
@@ -213,13 +383,15 @@
 
         alert('¡Comanda enviada a cocina con éxito!');
         cart = {};
+        document.getElementById('orderNotes').value = '';
         updateCartUI();
+        renderCurrentView();
         closeModal();
       } catch (err) {
         alert('Error al enviar la comanda. Inténtalo de nuevo.');
       } finally {
         btn.disabled = false;
-        btn.innerText = 'Confirmar y Enviar Pedido';
+        btn.innerText = 'Confirmar y Enviar a Cocina';
       }
     }
 
