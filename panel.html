@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control - El Txoko</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-serif-title { font-family: 'Playfair Display', serif; }
+    .item-done { text-decoration: line-through; opacity: 0.45; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-[#F7F4EE] text-[#292524] min-h-screen p-4 sm:p-6">
+
+  <!-- Header Centralizado -->
+  <header class="pb-4 border-b border-[#E8E1D3] mb-6 space-y-4">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-[#292524] text-[#FAF7F2] flex items-center justify-center text-2xl shadow-xs">
+          📋
+        </div>
+        <div>
+          <h1 class="font-serif-title text-2xl font-bold text-[#1C1917] tracking-tight">Panel El Txoko</h1>
+          <p class="text-xs text-[#78716C] font-semibold flex items-center gap-1.5 mt-0.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
+            <span>Sincronización en vivo cada 2.5s</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Selector de Vistas Principales -->
+      <div class="flex items-center gap-1.5 bg-[#EFE9DC] p-1.5 rounded-2xl text-xs font-bold w-full sm:w-auto justify-center border border-[#DFD6C3]">
+        <button onclick="switchView('cocina')" id="tab-cocina" class="px-3.5 py-2 rounded-xl bg-[#292524] text-[#FAF7F2] shadow-xs transition-all flex items-center gap-1.5">
+          <span>👨‍🍳 Cocina</span>
+          <span id="badgeCocina" class="bg-amber-600 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+        <button onclick="switchView('barra')" id="tab-barra" class="px-3.5 py-2 rounded-xl text-[#57534E] hover:bg-white transition-all flex items-center gap-1.5">
+          <span>🍸 Barra</span>
+          <span id="badgeBarra" class="bg-amber-600 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+        <button onclick="switchView('caja')" id="tab-caja" class="px-3.5 py-2 rounded-xl text-[#57534E] hover:bg-white transition-all flex items-center gap-1.5">
+          <span>💳 Caja & Mesas</span>
+          <span id="badgeCaja" class="bg-[#292524] text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+      </div>
+
+      <div class="text-right hidden sm:block">
+        <p id="clock" class="text-xl font-mono font-extrabold text-[#1C1917]">00:00:00</p>
+        <p id="activeOrdersCount" class="text-xs font-bold text-[#B45309] uppercase tracking-wider">0 comandas activas</p>
+      </div>
+    </div>
+
+    <!-- Barra de Filtro Rápido por Rango de Mesas -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+      <span class="text-[#78716C] font-bold whitespace-nowrap text-[11px] uppercase tracking-wider">Filtrar mesas:</span>
+      <button onclick="setTableFilter('all', this)" class="table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-[#292524] text-white border border-[#292524] transition-all">Todas</button>
+      <button onclick="setTableFilter('1-10', this)" class="table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-white text-[#57534E] border border-[#E8E1D3] hover:bg-[#F2ECE1] transition-all">Mesas 1-10</button>
+      <button onclick="setTableFilter('11-20', this)" class="table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-white text-[#57534E] border border-[#E8E1D3] hover:bg-[#F2ECE1] transition-all">Mesas 11-20</button>
+      <button onclick="setTableFilter('21-30', this)" class="table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-white text-[#57534E] border border-[#E8E1D3] hover:bg-[#F2ECE1] transition-all">Mesas 21-30</button>
+      <button onclick="setTableFilter('31-40', this)" class="table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-white text-[#57534E] border border-[#E8E1D3] hover:bg-[#F2ECE1] transition-all">Mesas 31-40</button>
+      <button onclick="setTableFilter('41-50', this)" class="table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-white text-[#57534E] border border-[#E8E1D3] hover:bg-[#F2ECE1] transition-all">Mesas 41-50</button>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main>
+    <!-- VISTA 1: COCINA -->
+    <div id="view-cocina">
+      <div id="gridCocina" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div class="col-span-full text-center py-20 text-[#A8A29E] font-medium text-xs">Cargando comandas de cocina...</div>
+      </div>
+    </div>
+
+    <!-- VISTA 2: BARRA -->
+    <div id="view-barra" class="hidden">
+      <div id="gridBarra" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div class="col-span-full text-center py-20 text-[#A8A29E] font-medium text-xs">Cargando rondas de barra...</div>
+      </div>
+    </div>
+
+    <!-- VISTA 3: CAJA & MESAS -->
+    <div id="view-caja" class="hidden">
+      <div id="gridCaja" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div class="col-span-full text-center py-20 text-[#A8A29E] font-medium text-xs">Consultando cuentas de mesas...</div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbysURFYc67OQD-frUo0PsXEcv4DEDwArFF4jm9T_m7AUZx2yjVtS0XJ_ZHNWzNa4vPQ/exec";
+
+    let currentOrders = [];
+    let currentView = 'cocina';
+    let currentFilter = 'all';
+
+    // Estados de tachado local
+    let completedKitchenState = {};
+    let completedDrinksState = {};
+    let locallyClearedKitchen = new Set();
+    let locallyClearedBar = new Set();
+    let locallyPaidTables = new Set();
+
+    // Reloj y refresco de vista cada segundo
+    setInterval(() => {
+      const clockEl = document.getElementById('clock');
+      if (clockEl) clockEl.innerText = new Date().toLocaleTimeString('es-ES');
+      renderCurrentView();
+    }, 1000);
+
+    function switchView(view) {
+      currentView = view;
+      const tabs = ['cocina', 'barra', 'caja'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        const viewEl = document.getElementById(`view-${t}`);
+        if (t === view) {
+          btn.className = "px-3.5 py-2 rounded-xl bg-[#292524] text-[#FAF7F2] shadow-xs transition-all flex items-center gap-1.5";
+          viewEl.classList.remove('hidden');
+        } else {
+          btn.className = "px-3.5 py-2 rounded-xl text-[#57534E] hover:bg-white transition-all flex items-center gap-1.5";
+          viewEl.classList.add('hidden');
+        }
+      });
+      renderCurrentView();
+    }
+
+    function setTableFilter(filterRange, clickedBtn) {
+      currentFilter = filterRange;
+      document.querySelectorAll('.table-filter-btn').forEach(btn => {
+        btn.className = "table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-white text-[#57534E] border border-[#E8E1D3] hover:bg-[#F2ECE1] transition-all";
+      });
+      if (clickedBtn) {
+        clickedBtn.className = "table-filter-btn px-3 py-1.5 rounded-xl font-bold bg-[#292524] text-white border border-[#292524] transition-all";
+      }
+      renderCurrentView();
+    }
+
+    function matchesTableFilter(mesaStr) {
+      if (currentFilter === 'all') return true;
+      const numMatch = String(mesaStr || '').match(/\d+/);
+      if (!numMatch) return true;
+      const num = parseInt(numMatch[0], 10);
+      const [min, max] = currentFilter.split('-').map(Number);
+      return num >= min && num <= max;
+    }
+
+    /* --- CÁLCULO DE SEGUNDOS TRANSCURRIDOS CON AUTO-COMPENSACIÓN --- */
+    function calculateElapsedSeconds(dateVal) {
+      if (!dateVal) return 0;
+      try {
+        let orderDate = null;
+
+        if (dateVal instanceof Date) {
+          orderDate = dateVal;
+        } else {
+          let str = String(dateVal).trim();
+
+          if (str.includes('T')) {
+            orderDate = new Date(str);
+          } else if (str.includes('-')) {
+            // Formato "YYYY-MM-DD HH:mm:ss"
+            const parts = str.split(' ');
+            const d = parts[0].split('-');
+            const t = (parts[1] || '00:00:00').split(':');
+            orderDate = new Date(
+              parseInt(d[0], 10),
+              parseInt(d[1], 10) - 1,
+              parseInt(d[2], 10),
+              parseInt(t[0], 10) || 0,
+              parseInt(t[1], 10) || 0,
+              parseInt(t[2], 10) || 0
+            );
+          } else if (str.includes('/')) {
+            // Formato "DD/MM/YYYY HH:mm:ss"
+            const parts = str.split(' ');
+            const d = parts[0].split('/');
+            const t = (parts[1] || '00:00:00').split(':');
+            orderDate = new Date(
+              parseInt(d[2], 10),
+              parseInt(d[1], 10) - 1,
+              parseInt(d[0], 10),
+              parseInt(t[0], 10) || 0,
+              parseInt(t[1], 10) || 0,
+              parseInt(t[2], 10) || 0
+            );
+          } else {
+            orderDate = new Date(str);
+          }
+        }
+
+        if (!orderDate || isNaN(orderDate.getTime())) return 0;
+
+        let diffMs = Date.now() - orderDate.getTime();
+
+        // Si hay desfase de zona horaria (UTC vs CEST por ejemplo)
+        if (diffMs < -1800000) {
+          const hoursOffset = Math.round(Math.abs(diffMs) / 3600000);
+          diffMs += hoursOffset * 3600000;
+        }
+
+        const totalSecs = Math.max(0, Math.floor(diffMs / 1000));
+        return totalSecs;
+      } catch (err) {
+        return 0;
+      }
+    }
+
+    /* --- PARSEADORES DE PLATOS Y BEBIDAS --- */
+    function parseKitchenCategories(resumenStr) {
+      if (!resumenStr) return { tapas: [], platos: [], postres: [] };
+      const raw = resumenStr.includes('|') ? resumenStr.split('|') : resumenStr.split(',');
+      const res = { tapas: [], platos: [], postres: [] };
+
+      raw.forEach((it, idx) => {
+        const t = it.trim();
+        if (!t) return;
+        if (t.startsWith('[')) {
+          const cb = t.indexOf(']');
+          if (cb !== -1) {
+            const cat = t.substring(1, cb).toLowerCase();
+            const text = t.substring(cb + 1).trim();
+            // Descartamos bebidas en cocina
+            if (cat.includes('beb') || cat.includes('bar') || cat.includes('vin') || cat.includes('cervez') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa')) return;
+            if (cat.includes('tapa')) res.tapas.push({ originalIndex: idx, texto: text });
+            else if (cat.includes('postre')) res.postres.push({ originalIndex: idx, texto: text });
+            else res.platos.push({ originalIndex: idx, texto: text });
+            return;
+          }
+        }
+        const low = t.toLowerCase();
+        if (low.includes('caña') || low.includes('cerveza') || low.includes('vino') || low.includes('agua') || low.includes('refresco') || low.includes('coca') || low.includes('fanta') || low.includes('copa') || low.includes('café') || low.includes('cafe')) return;
+        if (low.includes('tapa') || low.includes('brava') || low.includes('croqueta')) res.tapas.push({ originalIndex: idx, texto: t });
+        else if (low.includes('postre') || low.includes('tarta') || low.includes('helado')) res.postres.push({ originalIndex: idx, texto: t });
+        else res.platos.push({ originalIndex: idx, texto: t });
+      });
+      return res;
+    }
+
+    function parseBarDrinks(resumenStr) {
+      if (!resumenStr) return [];
+      const raw = resumenStr.includes('|') ? resumenStr.split('|') : resumenStr.split(',');
+      const drinks = [];
+
+      raw.forEach((it, idx) => {
+        const t = it.trim();
+        if (!t) return;
+        if (t.startsWith('[')) {
+          const cb = t.indexOf(']');
+          if (cb !== -1) {
+            const cat = t.substring(1, cb).toLowerCase();
+            const text = t.substring(cb + 1).trim();
+            if (cat.includes('beb') || cat.includes('bar') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa') || cat.includes('vin') || cat.includes('cervez')) {
+              drinks.push({ originalIndex: idx, texto: text });
+              return;
+            }
+          }
+        }
+        const low = t.toLowerCase();
+        const kw = ['caña', 'cerveza', 'vino', 'agua', 'refresco', 'coca', 'fanta', 'nestea', 'aquarius', 'sprite', 'copa', 'café', 'cafe', 'cortado', 'poleo', 'infusion', 'te', 'vermut', 'tinto'];
+        if (kw.some(k => low.includes(k))) {
+          drinks.push({ originalIndex: idx, texto: t.replace(/\[.*?\]/, '').trim() });
+        }
+      });
+      return drinks;
+    }
+
+    async function fetchOrders() {
+      try {
+        const antiCache = `${API_URL}?action=getPedidos&_t=${Date.now()}&r=${Math.random()}`;
+        const res = await fetch(antiCache, { method: 'GET', cache: 'no-store', redirect: 'follow' });
+        const data = await res.json();
+
+        currentOrders = (Array.isArray(data) ? data : []).filter(o => {
+          const mesa = String(o.Mesa || o.mesa || '').trim().toLowerCase();
+          return !locallyPaidTables.has(mesa);
+        });
+
+        updateBadges();
+        renderCurrentView();
+      } catch (err) {
+        console.error("Error al consultar pedidos:", err);
+      }
+    }
+
+    function updateBadges() {
+      const kCount = currentOrders.filter(o => {
+        const id = String(o.ID_Pedido || o.id_pedido || o.ID || '').trim();
+        const st = String(o.Estado_Cocina || o.estado_cocina || '').trim();
+        const cats = parseKitchenCategories(o.Resumen_Platos || o.resumen_platos);
+        return !locallyClearedKitchen.has(id) && st !== 'Listo' && (cats.tapas.length + cats.platos.length + cats.postres.length) > 0;
+      }).length;
+
+      const bCount = currentOrders.filter(o => {
+        const id = String(o.ID_Pedido || o.id_pedido || o.ID || '').trim();
+        const st = String(o.Estado_Barra || o.estado_barra || '').trim().toLowerCase();
+        const drinks = parseBarDrinks(o.Resumen_Platos || o.resumen_platos);
+        return !locallyClearedBar.has(id) && st !== 'listo' && drinks.length > 0;
+      }).length;
+
+      const activeTables = new Set();
+      currentOrders.forEach(o => {
+        const m = String(o.Mesa || o.mesa || '').trim();
+        if (m) activeTables.add(m);
+      });
+
+      document.getElementById('badgeCocina').innerText = kCount;
+      document.getElementById('badgeBarra').innerText = bCount;
+      document.getElementById('badgeCaja').innerText = activeTables.size;
+      document.getElementById('activeOrdersCount').innerText = `${kCount + bCount} comandas activas`;
+    }
+
+    function renderCurrentView() {
+      if (currentView === 'cocina') renderCocina();
+      else if (currentView === 'barra') renderBarra();
+      else if (currentView === 'caja') renderCaja();
+    }
+
+    /* --- VISTA: COCINA --- */
+    function renderCocina() {
+      const grid = document.getElementById('gridCocina');
+      const orders = currentOrders.filter(o => {
+        const id = String(o.ID_Pedido || o.id_pedido || o.ID || '').trim();
+        const st = String(o.Estado_Cocina || o.estado_cocina || '').trim();
+        const mesa = o.Mesa || o.mesa || '';
+        const cats = parseKitchenCategories(o.Resumen_Platos || o.resumen_platos);
+        const hasFood = (cats.tapas.length + cats.platos.length + cats.postres.length) > 0;
+        return !locallyClearedKitchen.has(id) && st !== 'Listo' && hasFood && matchesTableFilter(mesa);
+      });
+
+      if (orders.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-24 bg-[#FAF7F2] rounded-3xl border border-[#E8E1D3]">
+            <p class="text-4xl mb-2">🍽️</p>
+            <p class="text-base font-bold text-[#1C1917]">Pase de cocina al día</p>
+            <p class="text-xs text-[#A8A29E] mt-1">No hay comandas pendientes para este filtro</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = orders.map(ord => {
+        const mesa = ord.Mesa || ord.mesa || 'Mesa ?';
+        const rawDate = ord.Fecha_Hora || ord.fecha_hora || '';
+        const totalSecs = calculateElapsedSeconds(rawDate);
+        const mins = Math.floor(totalSecs / 60);
+        const isLate = mins >= 15;
+        const timeAgo = mins < 1 ? `Hace ${totalSecs}s` : `Hace ${mins} min`;
+
+        const id = String(ord.ID_Pedido || ord.id_pedido || ord.ID || 'PED').trim();
+        const row = ord.rowIndex;
+        const notas = ord.Notas_Cliente || ord.notas_cliente || '';
+
+        const cats = parseKitchenCategories(ord.Resumen_Platos || ord.resumen_platos);
+        const state = completedKitchenState[id] || {};
+        const allFood = [...cats.tapas, ...cats.platos, ...cats.postres];
+        const allDone = allFood.length > 0 && allFood.every(it => state[it.originalIndex]);
+
+        const renderBlock = (title, list, icon) => {
+          if (!list || list.length === 0) return '';
+          return `
+            <div class="bg-white border border-[#E8E1D3] rounded-2xl p-2.5 mb-2.5 space-y-1.5">
+              <div class="flex items-center gap-1.5 pb-1 border-b border-[#EFE9DC] text-[#78716C]">
+                <span class="text-xs">${icon}</span>
+                <span class="text-[10px] font-black uppercase tracking-wider">${title}</span>
+              </div>
+              ${list.map(it => {
+                const done = !!state[it.originalIndex];
+                return `
+                  <div onclick="toggleKitchenItem('${id}',${it.originalIndex})" class="cursor-pointer flex items-center justify-between p-2 rounded-xl bg-[#FAF7F2] hover:bg-[#F2ECE1] select-none border border-[#EFE9DC] ${done ? 'item-done bg-[#EFE9DC]/60' : ''}">
+                    <span class="text-xs font-bold ${done ? 'text-[#A8A29E]' : 'text-[#1C1917]'}">${it.texto}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg ${done ? 'bg-emerald-100 text-emerald-800' : 'bg-white text-[#A8A29E] border border-[#E8E1D3]'}">
+                      ${done ? '✓ Listo' : '⚪ Pendiente'}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        };
+
+        return `
+          <div class="bg-[#FAF7F2] border ${isLate ? 'border-red-400 ring-2 ring-red-400/20' : 'border-[#E8E1D3]'} rounded-3xl p-4 flex flex-col justify-between shadow-xs">
+            <div>
+              <div class="flex justify-between items-center border-b border-[#E8E1D3] pb-3 mb-3">
+                <span class="text-base font-black ${isLate ? 'bg-red-600 text-white' : 'bg-[#292524] text-white'} px-3.5 py-1 rounded-xl">
+                  ${mesa}
+                </span>
+                <span class="text-xs font-extrabold ${isLate ? 'text-red-600' : 'text-[#B45309]'}">
+                  ⏱️ ${timeAgo}
+                </span>
+              </div>
+
+              ${renderBlock('Tapas', cats.tapas, '🍢')}
+              ${renderBlock('Principales', cats.platos, '🥘')}
+              ${renderBlock('Postres', cats.postres, '🍰')}
+
+              ${notas ? `
+                <div class="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl p-2.5 text-xs text-[#92400E] mb-3">
+                  <span class="font-black uppercase tracking-wider block mb-0.5">⚠️ Nota:</span>
+                  <span class="font-medium">${notas}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="pt-3 border-t border-[#E8E1D3] flex justify-between items-center">
+              <span class="text-[11px] text-[#A8A29E] font-mono font-bold">${id}</span>
+              <button onclick="markKitchenDone(${row}, '${id}')" class="${allDone ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-[#292524] hover:bg-[#1C1917]'} text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all active:scale-95">
+                ${allDone ? 'Platos Servidos' : 'Completar Pase'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleKitchenItem(id, idx) {
+      if (!completedKitchenState[id]) completedKitchenState[id] = {};
+      completedKitchenState[id][idx] = !completedKitchenState[id][idx];
+      renderCocina();
+    }
+
+    async function markKitchenDone(row, id) {
+      if (id) locallyClearedKitchen.add(id);
+      updateBadges();
+      renderCocina();
+      await fetch(`${API_URL}?action=marcarListoCocina&idPedido=${encodeURIComponent(id)}&rowIndex=${row}&_t=${Date.now()}`, { mode: 'no-cors' });
+    }
+
+    /* --- VISTA: BARRA --- */
+    function renderBarra() {
+      const grid = document.getElementById('gridBarra');
+      const orders = currentOrders.filter(o => {
+        const id = String(o.ID_Pedido || o.id_pedido || o.ID || '').trim();
+        const st = String(o.Estado_Barra || o.estado_barra || '').trim().toLowerCase();
+        const mesa = o.Mesa || o.mesa || '';
+        const drinks = parseBarDrinks(o.Resumen_Platos || o.resumen_platos);
+        return !locallyClearedBar.has(id) && st !== 'listo' && drinks.length > 0 && matchesTableFilter(mesa);
+      });
+
+      if (orders.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-24 bg-[#FAF7F2] rounded-3xl border border-[#E8E1D3]">
+            <p class="text-4xl mb-2">🍸</p>
+            <p class="text-base font-bold text-[#1C1917]">Pase de bebidas despejado</p>
+            <p class="text-xs text-[#A8A29E] mt-1">No hay bebidas pendientes</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = orders.map(ord => {
+        const mesa = ord.Mesa || ord.mesa || 'Mesa ?';
+        const rawDate = ord.Fecha_Hora || ord.fecha_hora || '';
+        const totalSecs = calculateElapsedSeconds(rawDate);
+        const mins = Math.floor(totalSecs / 60);
+        const isLate = mins >= 10;
+        const timeAgo = mins < 1 ? `Hace ${totalSecs}s` : `Hace ${mins} min`;
+
+        const id = String(ord.ID_Pedido || ord.id_pedido || ord.ID || 'PED').trim();
+        const row = ord.rowIndex;
+        const notas = ord.Notas_Cliente || ord.notas_cliente || '';
+
+        const drinks = parseBarDrinks(ord.Resumen_Platos || ord.resumen_platos);
+        const state = completedDrinksState[id] || {};
+        const allDone = drinks.length > 0 && drinks.every(d => state[d.originalIndex]);
+
+        return `
+          <div class="bg-[#FAF7F2] border ${isLate ? 'border-red-400 ring-2 ring-red-400/20' : 'border-[#E8E1D3]'} rounded-3xl p-4 flex flex-col justify-between shadow-xs">
+            <div>
+              <div class="flex justify-between items-center border-b border-[#E8E1D3] pb-3 mb-3">
+                <span class="text-base font-black ${isLate ? 'bg-red-600 text-white' : 'bg-[#292524] text-white'} px-3.5 py-1 rounded-xl">
+                  ${mesa}
+                </span>
+                <span class="text-xs font-extrabold ${isLate ? 'text-red-600' : 'text-[#B45309]'}">
+                  ⏱️ ${timeAgo}
+                </span>
+              </div>
+
+              <div class="bg-white border border-[#E8E1D3] rounded-2xl p-2.5 mb-3 space-y-1.5">
+                <div class="flex items-center gap-1.5 pb-1 border-b border-[#EFE9DC] text-[#78716C]">
+                  <span class="text-xs">🍸</span>
+                  <span class="text-[10px] font-black uppercase tracking-wider">Bebidas a servir</span>
+                </div>
+                ${drinks.map(d => {
+                  const done = !!state[d.originalIndex];
+                  return `
+                    <div onclick="toggleDrinkItem('${id}',${d.originalIndex})" class="cursor-pointer flex items-center justify-between p-2 rounded-xl bg-[#FAF7F2] hover:bg-[#F2ECE1] select-none border border-[#EFE9DC] ${done ? 'item-done bg-[#EFE9DC]/60' : ''}">
+                      <span class="text-xs font-bold ${done ? 'text-[#A8A29E]' : 'text-[#1C1917]'}">${d.texto}</span>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-lg ${done ? 'bg-emerald-100 text-emerald-800' : 'bg-white text-[#A8A29E] border border-[#E8E1D3]'}">
+                        ${done ? '✓ Servida' : '⚪ Pendiente'}
+                      </span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+
+              ${notas ? `
+                <div class="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl p-2.5 text-xs text-[#92400E] mb-3">
+                  <span class="font-black uppercase tracking-wider block mb-0.5">⚠️ Nota:</span>
+                  <span class="font-medium">${notas}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="pt-3 border-t border-[#E8E1D3] flex justify-between items-center">
+              <span class="text-[11px] text-[#A8A29E] font-mono font-bold">${id}</span>
+              <button onclick="markBarDone(${row}, '${id}')" class="${allDone ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-[#292524] hover:bg-[#1C1917]'} text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all active:scale-95">
+                ${allDone ? 'Ronda Servida' : 'Servir Todo'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleDrinkItem(id, idx) {
+      if (!completedDrinksState[id]) completedDrinksState[id] = {};
+      completedDrinksState[id][idx] = !completedDrinksState[id][idx];
+      renderBarra();
+    }
+
+    async function markBarDone(row, id) {
+      if (id) locallyClearedBar.add(id);
+      updateBadges();
+      renderBarra();
+      await fetch(`${API_URL}?action=marcarListoBarra&idPedido=${encodeURIComponent(id)}&rowIndex=${row}&_t=${Date.now()}`, { mode: 'no-cors' });
+    }
+
+    /* --- VISTA: CAJA & MESAS --- */
+    function renderCaja() {
+      const grid = document.getElementById('gridCaja');
+      const tablesMap = {};
+
+      currentOrders.forEach(ord => {
+        const mesa = String(ord.Mesa || ord.mesa || 'Mesa ?').trim();
+        if (!matchesTableFilter(mesa)) return;
+        if (!tablesMap[mesa]) tablesMap[mesa] = { total: 0, pedidos: [] };
+        tablesMap[mesa].total += parseFloat(ord.Total || ord.total || 0);
+        tablesMap[mesa].pedidos.push(ord);
+      });
+
+      const tableNames = Object.keys(tablesMap);
+
+      if (tableNames.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-24 bg-[#FAF7F2] rounded-3xl border border-[#E8E1D3]">
+            <p class="text-4xl mb-2">🧾</p>
+            <p class="text-base font-bold text-[#1C1917]">Caja al día</p>
+            <p class="text-xs text-[#A8A29E] mt-1">No hay mesas con cuentas pendientes</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = tableNames.map(mesa => {
+        const data = tablesMap[mesa];
+        return `
+          <div class="bg-[#FAF7F2] border-2 border-[#D5C9B3] rounded-3xl p-5 flex flex-col justify-between shadow-xs">
+            <div>
+              <div class="flex justify-between items-center border-b border-[#E8E1D3] pb-3 mb-3">
+                <span class="text-lg font-black bg-[#292524] text-white px-3.5 py-1.5 rounded-2xl">
+                  ${mesa}
+                </span>
+                <div class="text-right">
+                  <span class="text-[10px] font-bold text-[#78716C] uppercase tracking-wider block">Total Mesa</span>
+                  <span class="text-2xl font-black text-[#B45309]">${data.total.toFixed(2)} €</span>
+                </div>
+              </div>
+
+              <div class="space-y-2 mb-4 max-h-56 overflow-y-auto pr-1">
+                ${data.pedidos.map((p, idx) => {
+                  const items = (p.Resumen_Platos || p.resumen_platos || '').split('|');
+                  return `
+                    <div class="bg-white border border-[#E8E1D3] rounded-xl p-2.5 text-xs">
+                      <div class="flex justify-between font-bold text-[#1C1917] pb-1 mb-1 border-b border-[#EFE9DC]">
+                        <span>Ronda #${idx + 1}</span>
+                        <span class="text-[#B45309]">${parseFloat(p.Total || p.total || 0).toFixed(2)} €</span>
+                      </div>
+                      <ul class="text-[11px] text-[#57534E] space-y-0.5">
+                        ${items.map(it => `<li>• ${it.replace(/\[.*?\]/, '').trim()}</li>`).join('')}
+                      </ul>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <button onclick="cobrarMesa('${mesa}')" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-3.5 rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wider">
+              <span>💳</span>
+              <span>Cobrar y Cerrar (${data.total.toFixed(2)} €)</span>
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function cobrarMesa(mesaName) {
+      if (!confirm(`¿Confirmar cobro de ${mesaName}? La mesa volverá a quedar libre.`)) return;
+
+      locallyPaidTables.add(mesaName.toLowerCase());
+      currentOrders = currentOrders.filter(o => String(o.Mesa || o.mesa || '').trim().toLowerCase() !== mesaName.toLowerCase());
+      updateBadges();
+      renderCaja();
+
+      await fetch(`${API_URL}?action=cobrarMesa&mesa=${encodeURIComponent(mesaName)}&_t=${Date.now()}`, { mode: 'no-cors' });
+    }
+
+    // Arranque inicial y sondeo periódico
+    fetchOrders();
+    setInterval(fetchOrders, 2500);
+  </script>
+</body>
+</html>

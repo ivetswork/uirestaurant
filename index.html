@@ -3,116 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Restaurante Oliva - Carta Digital</title>
+  <title>Carta Digital Interactiva - El Txoko</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-serif-title { font-family: 'Playfair Display', serif; }
+    .scrollbar-none::-webkit-scrollbar { display: none; }
+    .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes cartPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+      100% { transform: scale(1); }
+    }
+    .cart-bump { animation: cartPop 0.25s ease-out; }
+
+    .flying-dot {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #B45309;
+      transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
   </style>
 </head>
-<body class="bg-[#FDFBF7] text-[#2C302E] pb-32 min-h-screen">
+<body class="bg-[#F7F4EE] text-[#292524] pb-32 min-h-screen">
 
-  <!-- Encabezado Oliva -->
-  <header class="bg-[#1E3A2B] text-[#FDFBF7] p-4 shadow-sm sticky top-0 z-20 border-b border-[#2D4F3B]">
+  <!-- Header Cálido y Elegante -->
+  <header class="bg-[#FAF7F2]/90 backdrop-blur-md text-[#292524] p-4 sticky top-0 z-20 border-b border-[#E8E1D3]">
     <div class="max-w-md mx-auto flex justify-between items-center">
-      <div>
-        <h1 class="font-serif-title text-2xl font-bold tracking-tight text-[#FDFBF7]">Restaurante Oliva</h1>
-        <p class="text-xs text-[#E8DCC4] flex items-center gap-1 mt-0.5" id="mesaBadge">
-          <span>📍</span> Detectando mesa...
-        </p>
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-[#EFE9DC] text-[#78350F] flex items-center justify-center text-xl font-bold shadow-xs border border-[#DFD6C3]">
+          ✦
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-extrabold tracking-tight font-serif-title text-[#1C1917]">Carta Digital</h1>
+            <span class="text-[10px] uppercase font-bold tracking-wider bg-[#EFE9DC] text-[#78350F] px-2 py-0.5 rounded-full border border-[#DFD6C3]">Mesa</span>
+          </div>
+          <p class="text-xs text-[#78716C] flex items-center gap-1 font-medium mt-0.5" id="mesaBadge">
+            <span>📍</span> Detectando mesa...
+          </p>
+        </div>
       </div>
-      <!-- Botón para ver la cuenta acumulada de la mesa -->
-      <button onclick="openBillModal()" class="bg-[#2D4F3B] hover:bg-[#3D6850] text-[#FDFBF7] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm border border-[#3D6850] transition-all active:scale-95">
+      
+      <!-- Botón Mi Cuenta -->
+      <button onclick="openBillModal()" class="bg-[#EFE9DC] hover:bg-[#E5DDCB] text-[#44403C] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-[#DFD6C3] transition-all active:scale-95 shadow-2xs">
         <span>🧾</span>
         <span>Mi Cuenta</span>
       </button>
     </div>
   </header>
 
-  <main class="max-w-md mx-auto p-4 space-y-5">
-    <!-- Selector de Categorías -->
-    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none" id="categoriesBar">
-      <button onclick="filterCategory('Todos')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-[#1E3A2B] text-[#FDFBF7] shadow-sm transition-all">Todos</button>
-      <button onclick="filterCategory('Bebidas')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Bebidas</button>
-      <button onclick="filterCategory('Tapas')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Tapas</button>
-      <button onclick="filterCategory('Raciones')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Raciones / Platos</button>
-      <button onclick="filterCategory('Postres')" class="cat-btn px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider bg-white text-[#1E3A2B] border border-[#EBE5D8] shadow-sm transition-all">Postres</button>
+  <main class="max-w-md mx-auto p-4 space-y-4">
+
+    <!-- Buscador interactivo rápido -->
+    <div class="relative">
+      <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Buscar platos, bebidas, postres..." class="w-full bg-[#FAF7F2] border border-[#E3DAC8] rounded-2xl py-3 pl-10 pr-4 text-xs font-medium placeholder-[#A8A29E] text-[#292524] outline-none focus:border-[#B45309] focus:ring-2 focus:ring-[#B45309]/10 transition-all shadow-2xs">
+      <span class="absolute left-3.5 top-3.5 text-[#A8A29E] text-xs">🔍</span>
+      <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute right-3.5 top-3 text-[#A8A29E] hover:text-[#44403C] text-xs font-bold">✕</button>
     </div>
 
-    <!-- Contenedor de Platos -->
-    <div id="loading" class="text-center py-16 text-[#8C8275] text-sm">Cargando selección de platos...</div>
+    <!-- Barra de Categorías Dinámica -->
+    <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none" id="categoriesBar">
+      <button onclick="filterCategory('Todos')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#292524] text-[#FAF7F2] shadow-xs transition-all flex-shrink-0 active:scale-95">Todos</button>
+      <button onclick="filterCategory('Bebidas')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Bebidas</button>
+      <button onclick="filterCategory('Tapas')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Tapas</button>
+      <button onclick="filterCategory('Raciones')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Principales</button>
+      <button onclick="filterCategory('Postres')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Postres</button>
+    </div>
+
+    <!-- Estado de Carga -->
+    <div id="loading" class="text-center py-20 text-[#A8A29E] text-xs font-semibold">
+      <div class="w-7 h-7 border-3 border-[#B45309] border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      Cargando carta...
+    </div>
+
+    <!-- Listado de Platos -->
     <div id="productList" class="grid grid-cols-1 gap-3.5 hidden"></div>
   </main>
 
-  <!-- Barra flotante de Carrito Activo -->
-  <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-[#FDFBF7]/95 backdrop-blur-md border-t border-[#EBE5D8] p-4 shadow-xl hidden z-30">
+  <!-- Carrito Flotante Dinámico -->
+  <div id="cartBar" class="fixed bottom-0 left-0 right-0 bg-[#FAF7F2]/95 backdrop-blur-md border-t border-[#E3DAC8] p-4 shadow-xl hidden z-30 transition-transform">
     <div class="max-w-md mx-auto flex items-center justify-between">
-      <div>
-        <p class="text-xs text-[#8C8275] font-medium" id="cartCount">0 productos</p>
-        <p class="text-xl font-bold text-[#1E3A2B]" id="cartTotal">0.00 €</p>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[#EFE9DC] text-[#78350F] flex items-center justify-center font-bold text-sm border border-[#DFD6C3]">
+          🛍️
+        </div>
+        <div>
+          <p class="text-[11px] text-[#78716C] font-semibold" id="cartCount">0 productos</p>
+          <p class="text-lg font-black text-[#1C1917] tracking-tight" id="cartTotal">0.00 €</p>
+        </div>
       </div>
-      <button onclick="openModal()" class="bg-[#8B2635] hover:bg-[#A83244] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-transform active:scale-95 flex items-center gap-2 text-sm">
+      <button onclick="openModal()" class="bg-[#B45309] hover:bg-[#92400E] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2 text-xs uppercase tracking-wider">
         <span>Ver Comanda</span>
         <span>→</span>
       </button>
     </div>
   </div>
 
-  <!-- Modal de Pedido en curso (Carrito) -->
-  <div id="orderModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-[#FDFBF7] rounded-t-3xl sm:rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[85vh] overflow-y-auto border border-[#EBE5D8]">
-      <div class="flex justify-between items-center pb-2 border-b border-[#EBE5D8]">
-        <h2 class="font-serif-title font-bold text-xl text-[#1E3A2B]">Tu Selección</h2>
-        <button onclick="closeModal()" class="text-[#8C8275] hover:text-[#1E3A2B] text-2xl font-bold">&times;</button>
+  <!-- Modal de Comanda -->
+  <div id="orderModal" class="fixed inset-0 bg-[#1C1917]/50 backdrop-blur-xs z-40 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-[#FAF7F2] rounded-t-3xl sm:rounded-3xl w-full max-w-md p-6 space-y-4 max-h-[85vh] overflow-y-auto border border-[#E3DAC8] shadow-2xl">
+      <div class="flex justify-between items-center pb-3 border-b border-[#E8E1D3]">
+        <h2 class="font-serif-title font-bold text-lg text-[#1C1917]">Comanda de la mesa</h2>
+        <button onclick="closeModal()" class="text-[#A8A29E] hover:text-[#292524] text-2xl font-bold">&times;</button>
       </div>
       
-      <div id="modalItems" class="divide-y divide-[#EBE5D8] text-sm"></div>
+      <div id="modalItems" class="divide-y divide-[#EFE9DC] text-sm"></div>
 
       <div>
-        <label class="block text-xs font-bold text-[#1E3A2B] uppercase tracking-wider mb-1.5">Notas especiales para barra/cocina:</label>
-        <textarea id="orderNotes" rows="2" placeholder="Ej. Sin hielo en las bebidas, salsa aparte..." class="w-full bg-white border border-[#DCD5C5] rounded-xl p-3 text-sm outline-none focus:border-[#1E3A2B] focus:ring-1 focus:ring-[#1E3A2B] text-[#2C302E]"></textarea>
+        <label class="block text-[11px] font-bold text-[#78716C] uppercase tracking-wider mb-1.5">Instrucciones o notas para sala/cocina:</label>
+        <textarea id="orderNotes" rows="2" placeholder="Ej. Punto de la carne, refresco de la copa, sacar platos juntos..." class="w-full bg-white border border-[#E3DAC8] rounded-xl p-3 text-xs outline-none focus:border-[#B45309] text-[#292524] transition-all"></textarea>
       </div>
-      <button id="sendBtn" onclick="submitOrder()" class="w-full bg-[#1E3A2B] hover:bg-[#2D4F3B] text-[#FDFBF7] font-bold py-3.5 rounded-xl shadow-md transition-transform active:scale-98">
-        Confirmar y Enviar a Cocina
+      <button id="sendBtn" onclick="submitOrder()" class="w-full bg-[#292524] hover:bg-[#1C1917] text-[#FAF7F2] font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-98 text-xs uppercase tracking-wider">
+        Enviar a Preparación
       </button>
     </div>
   </div>
 
-  <!-- Modal de Cuenta Acumulada de la Mesa -->
-  <div id="billModal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-    <div class="bg-[#FDFBF7] rounded-t-3xl sm:rounded-2xl w-full max-w-md p-6 space-y-4 max-h-[85vh] overflow-y-auto border border-[#EBE5D8]">
-      <div class="flex justify-between items-center pb-2 border-b border-[#EBE5D8]">
+  <!-- Modal de Cuenta Acumulada -->
+  <div id="billModal" class="fixed inset-0 bg-[#1C1917]/50 backdrop-blur-xs z-40 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-[#FAF7F2] rounded-t-3xl sm:rounded-3xl w-full max-w-md p-6 space-y-4 max-h-[85vh] overflow-y-auto border border-[#E3DAC8] shadow-2xl">
+      <div class="flex justify-between items-center pb-3 border-b border-[#E8E1D3]">
         <div>
-          <h2 class="font-serif-title font-bold text-xl text-[#1E3A2B]">Cuenta de la Mesa</h2>
-          <p class="text-xs text-[#8C8275]" id="billMesaTitle">Historial de pedidos activos</p>
+          <h2 class="font-serif-title font-bold text-lg text-[#1C1917]">Cuenta Acumulada</h2>
+          <p class="text-xs text-[#78716C]" id="billMesaTitle">Consumos vivos</p>
         </div>
-        <button onclick="closeBillModal()" class="text-[#8C8275] hover:text-[#1E3A2B] text-2xl font-bold">&times;</button>
+        <button onclick="closeBillModal()" class="text-[#A8A29E] hover:text-[#292524] text-2xl font-bold">&times;</button>
       </div>
       
-      <div id="billContent" class="text-sm space-y-3">
-        <p class="text-center py-6 text-gray-500">Consultando consumo...</p>
+      <div id="billContent" class="text-sm space-y-2.5">
+        <p class="text-center py-6 text-[#A8A29E] text-xs">Cargando desglose...</p>
       </div>
 
-      <div class="border-t border-[#EBE5D8] pt-3 flex justify-between items-center">
-        <span class="font-extrabold text-sm text-[#1E3A2B] uppercase tracking-wider">Total Acumulado</span>
-        <span id="billGrandTotal" class="text-xl font-black text-[#8B2635]">0.00 €</span>
+      <div class="border-t border-[#E8E1D3] pt-3 flex justify-between items-center">
+        <span class="font-extrabold text-xs text-[#78716C] uppercase tracking-wider">Total a pagar</span>
+        <span id="billGrandTotal" class="text-xl font-black text-[#B45309]">0.00 €</span>
       </div>
 
-      <button onclick="closeBillModal()" class="w-full bg-[#EAE3D2] hover:bg-[#DFD6C2] text-[#1E3A2B] font-bold py-3 rounded-xl transition-all">
-        Volver a la Carta
+      <button onclick="closeBillModal()" class="w-full bg-[#EFE9DC] hover:bg-[#E5DDCB] text-[#44403C] font-bold py-3 rounded-xl transition-all text-xs uppercase tracking-wider">
+        Volver a la carta
       </button>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyz7V5nxJFw8Khi_c9L-KrgXvozY058e7yBSrnes6IkaAX4boZXOsC2BIWVYQMc1khG/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbysURFYc67OQD-frUo0PsXEcv4DEDwArFF4jm9T_m7AUZx2yjVtS0XJ_ZHNWzNa4vPQ/exec";
 
     let products = [];
     let cart = {};
     let currentCategory = 'Todos';
+    let searchQuery = '';
 
     const urlParams = new URLSearchParams(window.location.search);
     let mesaParam = urlParams.get('mesa') || 'Mesa 1';
@@ -121,20 +169,73 @@
     document.getElementById('mesaBadge').innerHTML = `<span>📍</span> ${mesaActual}`;
     document.getElementById('billMesaTitle').innerText = `${mesaActual} • Consumo activo`;
 
+    // --- CONTROL DE SEGURIDAD: EXPIRACIÓN DE SESIÓN (60 MINUTOS) ---
+    const MAX_SESSION_MINUTES = 60;
+
+    function checkSessionValidity() {
+      const now = Date.now();
+      const sessionKey = `qr_session_${mesaActual}`;
+      const savedTime = localStorage.getItem(sessionKey);
+
+      if (!savedTime) {
+        localStorage.setItem(sessionKey, now);
+        return true;
+      }
+
+      const elapsedMinutes = (now - parseInt(savedTime, 10)) / 60000;
+      return elapsedMinutes < MAX_SESSION_MINUTES;
+    }
+
+    function lockIfExpired() {
+      const sendBtn = document.getElementById('sendBtn');
+      if (!checkSessionValidity()) {
+        if (sendBtn) {
+          sendBtn.disabled = true;
+          sendBtn.className = "w-full bg-stone-300 text-stone-500 font-bold py-3.5 rounded-xl cursor-not-allowed text-xs uppercase tracking-wider";
+          sendBtn.innerText = "Sesión caducada • Vuelve a escanear el QR";
+        }
+        return true;
+      } else {
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.className = "w-full bg-[#292524] hover:bg-[#1C1917] text-[#FAF7F2] font-bold py-3.5 rounded-xl shadow-md transition-all active:scale-98 text-xs uppercase tracking-wider";
+          sendBtn.innerText = "Enviar a Preparación";
+        }
+        return false;
+      }
+    }
+
     async function loadProducts() {
       try {
-        const res = await fetch(`${API_URL}?action=getProductos`, { redirect: 'follow' });
+        const res = await fetch(`${API_URL}?action=getProductos&_t=${Date.now()}`, { 
+          cache: 'no-store', 
+          redirect: 'follow' 
+        });
         products = await res.json();
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('productList').classList.remove('hidden');
         renderCurrentView();
       } catch (e) {
-        document.getElementById('loading').innerText = 'No se ha podido cargar la carta. Revisa la conexión.';
+        document.getElementById('loading').innerText = 'No se pudo cargar la carta. Verifica la conexión.';
       }
+    }
+
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      const clearBtn = document.getElementById('clearSearch');
+      if (searchQuery.length > 0) clearBtn.classList.remove('hidden');
+      else clearBtn.classList.add('hidden');
+      renderCurrentView();
+    }
+
+    function clearSearchInput() {
+      document.getElementById('searchInput').value = '';
+      handleSearch('');
     }
 
     function renderCurrentView() {
       let filtered = products;
+
       if (currentCategory !== 'Todos') {
         filtered = products.filter(p => {
           const cat = (p.Categoria || p.categoria || '').toLowerCase();
@@ -142,11 +243,30 @@
           return cat.includes(currentCategory.toLowerCase());
         });
       }
+
+      if (searchQuery) {
+        filtered = filtered.filter(p => {
+          const n = (p.Nombre || p.nombre || '').toLowerCase();
+          const d = (p.Descripcion || p.descripcion || '').toLowerCase();
+          return n.includes(searchQuery) || d.includes(searchQuery);
+        });
+      }
+
       renderProducts(filtered);
     }
 
     function renderProducts(list) {
       const container = document.getElementById('productList');
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-16 text-[#A8A29E]">
+            <p class="text-2xl mb-1">🍃</p>
+            <p class="text-xs font-bold uppercase tracking-wider">No se encontraron productos</p>
+          </div>
+        `;
+        return;
+      }
+
       container.innerHTML = list.map(p => {
         const id = String(p.ID_Producto || p.id_producto || p.Nombre);
         const nombre = p.Nombre || p.nombre || '';
@@ -156,25 +276,27 @@
         const qty = cart[id] || 0;
 
         return `
-          <div class="bg-white rounded-2xl p-3.5 flex gap-3.5 items-center border border-[#EBE5D8] shadow-sm hover:border-[#D4C9B4] transition-all">
-            <img src="${img}" alt="${nombre}" class="w-20 h-20 rounded-xl object-cover bg-[#F5F2EB] flex-shrink-0">
-            <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-sm text-[#1E3A2B] truncate">${nombre}</h3>
-              <p class="text-xs text-[#736A5E] line-clamp-2 my-1 leading-relaxed">${desc}</p>
-              <p class="font-extrabold text-[#8B2635] text-sm">${precio} €</p>
+          <div class="bg-[#FAF7F2] rounded-2xl p-3 flex gap-3.5 items-center border border-[#E8E1D3] shadow-xs hover:border-[#D5C9B3] hover:shadow-sm transition-all duration-200">
+            <div class="relative overflow-hidden rounded-xl flex-shrink-0">
+              <img src="${img}" alt="${nombre}" class="w-20 h-20 object-cover bg-[#EFE9DC]">
             </div>
+            
+            <div class="flex-1 min-w-0">
+  <h3 class="font-bold text-xs sm:text-sm text-[#1C1917] leading-snug line-clamp-2 tracking-tight">${nombre}</h3>${desc ? `<p class="text-[11px] text-[#78716C] truncate my-0.5 leading-relaxed">${desc}</p>` : ''}
+  <p class="font-black text-[#B45309] text-xs sm:text-sm mt-1">${precio} €</p>
+</div>
             
             <div class="flex items-center gap-1.5 flex-shrink-0">
               ${qty > 0 ? `
-                <button onclick="modifyQty('${encodeURIComponent(id)}', -1)" class="w-8 h-8 rounded-lg bg-[#F4EFE6] text-[#8B2635] font-extrabold flex items-center justify-center text-base hover:bg-[#EBE5D8] transition-all active:scale-95">
+                <button onclick="modifyQty('${encodeURIComponent(id)}', -1, event)" class="w-8 h-8 rounded-xl bg-[#EFE9DC] text-[#44403C] font-extrabold flex items-center justify-center text-sm hover:bg-[#E5DDCB] transition-all active:scale-90 shadow-2xs">
                   −
                 </button>
-                <span class="text-xs font-bold text-[#1E3A2B] w-5 text-center">${qty}</span>
-                <button onclick="modifyQty('${encodeURIComponent(id)}', 1)" class="w-8 h-8 rounded-lg bg-[#1E3A2B] text-white font-extrabold flex items-center justify-center text-base hover:bg-[#2D4F3B] transition-all active:scale-95">
+                <span class="text-xs font-black text-[#1C1917] w-5 text-center">${qty}</span>
+                <button onclick="modifyQty('${encodeURIComponent(id)}', 1, event)" class="w-8 h-8 rounded-xl bg-[#292524] text-white font-extrabold flex items-center justify-center text-sm hover:bg-[#1C1917] transition-all active:scale-90 shadow-xs">
                   +
                 </button>
               ` : `
-                <button onclick="modifyQty('${encodeURIComponent(id)}', 1)" class="bg-[#F4EFE6] hover:bg-[#1E3A2B] hover:text-white text-[#1E3A2B] font-bold px-3 py-2 rounded-xl text-xs transition-all active:scale-95">
+                <button onclick="modifyQty('${encodeURIComponent(id)}', 1, event)" class="bg-[#FAF7F2] hover:bg-[#292524] hover:text-[#FAF7F2] text-[#44403C] border border-[#D5C9B3] font-bold px-3 py-2 rounded-xl text-xs transition-all active:scale-95 shadow-2xs">
                   + Añadir
                 </button>
               `}
@@ -187,25 +309,57 @@
     function filterCategory(cat) {
       currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(btn => {
-        btn.classList.remove('bg-[#1E3A2B]', 'text-[#FDFBF7]');
-        btn.classList.add('bg-white', 'text-[#1E3A2B]', 'border', 'border-[#EBE5D8]');
+        btn.classList.remove('bg-[#292524]', 'text-[#FAF7F2]', 'shadow-xs');
+        btn.classList.add('bg-[#FAF7F2]', 'text-[#57534E]', 'border', 'border-[#E3DAC8]');
         if (btn.innerText.toUpperCase().startsWith(cat.toUpperCase().substring(0, 4))) {
-          btn.classList.remove('bg-white', 'text-[#1E3A2B]', 'border', 'border-[#EBE5D8]');
-          btn.classList.add('bg-[#1E3A2B]', 'text-[#FDFBF7]');
+          btn.classList.remove('bg-[#FAF7F2]', 'text-[#57534E]', 'border', 'border-[#E3DAC8]');
+          btn.classList.add('bg-[#292524]', 'text-[#FAF7F2]', 'shadow-xs');
         }
       });
       renderCurrentView();
     }
 
-    function modifyQty(encodedId, delta) {
+    function triggerFlyAnimation(event) {
+      if (!event) return;
+      const dot = document.createElement('div');
+      dot.className = 'flying-dot';
+      const x = event.clientX;
+      const y = event.clientY;
+
+      dot.style.left = `${x - 7}px`;
+      dot.style.top = `${y - 7}px`;
+      document.body.appendChild(dot);
+
+      const targetX = window.innerWidth / 2;
+      const targetY = window.innerHeight - 30;
+
+      requestAnimationFrame(() => {
+        dot.style.transform = `translate(${targetX - x}px, ${targetY - y}px) scale(0.3)`;
+        dot.style.opacity = '0';
+      });
+
+      setTimeout(() => dot.remove(), 600);
+    }
+
+    function bumpCartBar() {
+      const bar = document.getElementById('cartBar');
+      bar.classList.remove('cart-bump');
+      void bar.offsetWidth;
+      bar.classList.add('cart-bump');
+    }
+
+    function modifyQty(encodedId, delta, event) {
       const id = decodeURIComponent(encodedId);
       const current = cart[id] || 0;
       const next = current + delta;
+
+      if (delta > 0 && event) triggerFlyAnimation(event);
 
       if (next > 0) cart[id] = next;
       else delete cart[id];
 
       updateCartUI();
+      bumpCartBar();
       renderCurrentView();
 
       if (!document.getElementById('orderModal').classList.contains('hidden')) {
@@ -217,6 +371,7 @@
       const id = decodeURIComponent(encodedId);
       delete cart[id];
       updateCartUI();
+      bumpCartBar();
       renderCurrentView();
       renderModalList();
     }
@@ -256,21 +411,21 @@
         const encoded = encodeURIComponent(id);
 
         return `
-          <div class="py-3 flex justify-between items-center gap-2">
+          <div class="py-2.5 flex justify-between items-center gap-2">
             <div class="flex-1 min-w-0">
-              <p class="font-medium text-[#1E3A2B] truncate">${p ? (p.Nombre || p.nombre) : id}</p>
-              <p class="text-xs text-[#8B2635] font-bold">${(cart[id] * precio).toFixed(2)} €</p>
+              <p class="font-semibold text-xs sm:text-sm text-[#1C1917] truncate">${p ? (p.Nombre || p.nombre) : id}</p>
+              <p class="text-xs text-[#B45309] font-black">${(cart[id] * precio).toFixed(2)} €</p>
             </div>
             
-            <div class="flex items-center gap-2">
-              <button onclick="modifyQty('${encoded}', -1)" class="w-7 h-7 rounded-lg bg-[#FAF7F0] border border-[#E0D7C6] text-[#8B2635] font-extrabold flex items-center justify-center hover:bg-[#F0EAE1]">
+            <div class="flex items-center gap-1.5">
+              <button onclick="modifyQty('${encoded}', -1, event)" class="w-7 h-7 rounded-lg bg-[#EFE9DC] text-[#44403C] font-extrabold flex items-center justify-center hover:bg-[#E5DDCB]">
                 −
               </button>
-              <span class="text-xs font-bold text-[#1E3A2B] w-4 text-center">${cart[id]}</span>
-              <button onclick="modifyQty('${encoded}', 1)" class="w-7 h-7 rounded-lg bg-[#FAF7F0] border border-[#E0D7C6] text-[#1E3A2B] font-extrabold flex items-center justify-center hover:bg-[#F0EAE1]">
+              <span class="text-xs font-bold text-[#1C1917] w-4 text-center">${cart[id]}</span>
+              <button onclick="modifyQty('${encoded}', 1, event)" class="w-7 h-7 rounded-lg bg-[#292524] text-white font-extrabold flex items-center justify-center hover:bg-[#1C1917]">
                 +
               </button>
-              <button onclick="deleteItem('${encoded}')" title="Eliminar plato" class="ml-2 text-xs text-[#8C8275] hover:text-[#8B2635] p-1 font-bold">
+              <button onclick="deleteItem('${encoded}')" title="Eliminar" class="ml-1 text-xs text-[#A8A29E] hover:text-red-600 p-1 font-bold">
                 ✕
               </button>
             </div>
@@ -281,6 +436,7 @@
 
     function openModal() {
       renderModalList();
+      lockIfExpired();
       document.getElementById('orderModal').classList.remove('hidden');
     }
 
@@ -288,26 +444,28 @@
       document.getElementById('orderModal').classList.add('hidden');
     }
 
-    // Modal de Cuenta Acumulada
     async function openBillModal() {
       const modal = document.getElementById('billModal');
       const content = document.getElementById('billContent');
       const totalDisplay = document.getElementById('billGrandTotal');
 
       modal.classList.remove('hidden');
-      content.innerHTML = '<p class="text-center py-6 text-gray-500">Consultando comanda activa...</p>';
+      content.innerHTML = '<p class="text-center py-6 text-[#A8A29E] text-xs">Consultando consumos activos...</p>';
       totalDisplay.innerText = '0.00 €';
 
       try {
-        const res = await fetch(`${API_URL}?action=getCuentaMesa&mesa=${encodeURIComponent(mesaActual)}`, { redirect: 'follow' });
+        const res = await fetch(`${API_URL}?action=getCuentaMesa&mesa=${encodeURIComponent(mesaActual)}&_t=${Date.now()}`, { 
+          cache: 'no-store', 
+          redirect: 'follow' 
+        });
         const orders = await res.json();
 
         if (!Array.isArray(orders) || orders.length === 0) {
           content.innerHTML = `
-            <div class="text-center py-8 text-[#8C8275]">
-              <p class="text-3xl mb-1">🍽️</p>
-              <p class="font-bold text-[#1E3A2B]">No hay consumos pendientes</p>
-              <p class="text-xs mt-1">Tus nuevos pedidos confirmados aparecerán aquí.</p>
+            <div class="text-center py-8 text-[#A8A29E]">
+              <p class="text-3xl mb-1">🌿</p>
+              <p class="font-bold text-[#1C1917] text-xs uppercase tracking-wider">No hay consumos pendientes</p>
+              <p class="text-[11px] mt-1">Los pedidos que hagas desde la mesa se irán sumando aquí.</p>
             </div>
           `;
           totalDisplay.innerText = '0.00 €';
@@ -319,15 +477,16 @@
           const ordTotal = parseFloat(ord.Total || ord.total || 0);
           grandTotal += ordTotal;
           const rawItems = (ord.Resumen_Platos || ord.resumen_platos || '').split('|');
-          const hora = (ord.Fecha_Hora || ord.fecha_hora || '').split(' ')[1] || '';
+          const hora = (ord.Fecha_Hora || ord.fecha_hora || '').split('T')[1]?.substring(0, 5) || 
+                       (ord.Fecha_Hora || ord.fecha_hora || '').split(' ')[1]?.substring(0, 5) || '';
 
           return `
-            <div class="bg-white border border-[#EBE5D8] rounded-2xl p-3.5 shadow-xs">
-              <div class="flex justify-between items-center border-b border-[#F0EAE1] pb-2 mb-2">
-                <span class="text-xs font-bold text-[#1E3A2B]">Ronda #${idx + 1} (${hora})</span>
-                <span class="text-xs font-extrabold text-[#8B2635]">${ordTotal.toFixed(2)} €</span>
+            <div class="bg-[#FAF7F2] border border-[#E8E1D3] rounded-2xl p-3 shadow-2xs">
+              <div class="flex justify-between items-center border-b border-[#E8E1D3] pb-1.5 mb-2">
+                <span class="text-xs font-bold text-[#1C1917]">Ronda #${idx + 1} ${hora ? `(${hora})` : ''}</span>
+                <span class="text-xs font-black text-[#B45309]">${ordTotal.toFixed(2)} €</span>
               </div>
-              <ul class="text-xs text-[#595247] space-y-1">
+              <ul class="text-[11px] text-[#57534E] space-y-1">
                 ${rawItems.map(item => {
                   const cleanItem = item.replace(/\[.*?\]/, '').trim();
                   return cleanItem ? `<li>• ${cleanItem}</li>` : '';
@@ -339,7 +498,7 @@
 
         totalDisplay.innerText = `${grandTotal.toFixed(2)} €`;
       } catch (err) {
-        content.innerHTML = '<p class="text-center py-4 text-red-500 text-xs">Error al cargar la cuenta. Inténtalo de nuevo.</p>';
+        content.innerHTML = '<p class="text-center py-4 text-red-500 text-xs">Error al consultar la cuenta.</p>';
       }
     }
 
@@ -348,9 +507,14 @@
     }
 
     async function submitOrder() {
+      if (lockIfExpired()) {
+        alert("Por seguridad, la sesión en esta mesa ha caducado tras 60 minutos.\nVuelve a enfocar el código QR de tu mesa para seguir pidiendo.");
+        return;
+      }
+
       const btn = document.getElementById('sendBtn');
       btn.disabled = true;
-      btn.innerText = 'Enviando comanda a cocina...';
+      btn.innerText = 'Enviando comanda...';
 
       const structuredItems = Object.keys(cart).map(id => {
         const p = products.find(prod => String(prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
@@ -365,33 +529,31 @@
         return sum + (cart[id] * price);
       }, 0);
 
-      const payload = {
+      const params = new URLSearchParams({
         action: 'crearPedido',
         mesa: mesaActual,
         resumen: structuredItems,
         total: total.toFixed(2),
         notas: document.getElementById('orderNotes').value
-      };
+      });
 
       try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        await fetch(`${API_URL}?${params.toString()}&_t=${Date.now()}`, {
+          method: 'GET',
+          cache: 'no-store',
+          mode: 'no-cors'
         });
 
-        alert('¡Comanda enviada a cocina con éxito!');
         cart = {};
         document.getElementById('orderNotes').value = '';
         updateCartUI();
         renderCurrentView();
         closeModal();
+        alert('¡Comanda enviada a preparación con éxito!');
       } catch (err) {
-        alert('Error al enviar la comanda. Inténtalo de nuevo.');
+        alert('Hubo un error al enviar el pedido. Por favor, reinténtalo.');
       } finally {
-        btn.disabled = false;
-        btn.innerText = 'Confirmar y Enviar a Cocina';
+        lockIfExpired();
       }
     }
 
