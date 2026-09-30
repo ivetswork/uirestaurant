@@ -162,9 +162,51 @@
     let currentCategory = 'Todos';
     let searchQuery = '';
 
-    const urlParams = new URLSearchParams(window.location.search);
-    let mesaParam = urlParams.get('mesa') || 'Mesa 1';
-    const mesaActual = decodeURIComponent(mesaParam).replace('!', '').trim();
+    // 1. Diccionario de tokens únicos para cada mesa (códigos difíciles de adivinar)
+const TABLE_TOKENS = {
+  "txk_8f1a": "Mesa 1",  "txk_9b2c": "Mesa 2",  "txk_3d4e": "Mesa 3",
+  "txk_5f6a": "Mesa 4",  "txk_7b8c": "Mesa 5",  "txk_1d2e": "Mesa 6",
+  "txk_4f5a": "Mesa 7",  "txk_6b7c": "Mesa 8",  "txk_8d9e": "Mesa 9",
+  "txk_2f3a": "Mesa 10", "txk_4b5c": "Mesa 11", "txk_6d7e": "Mesa 12",
+  "txk_9f1a": "Mesa 13", "txk_1b2c": "Mesa 14", "txk_3d5e": "Mesa 15",
+  "txk_5f7a": "Mesa 16", "txk_7b9c": "Mesa 17", "txk_9d1e": "Mesa 18",
+  "txk_2f4a": "Mesa 19", "txk_4b6c": "Mesa 20", "txk_6d8e": "Mesa 21",
+  "txk_8f0a": "Mesa 22", "txk_0b2c": "Mesa 23", "txk_2d4e": "Mesa 24",
+  "txk_4f6a": "Mesa 25", "txk_6b8c": "Mesa 26", "txk_8d0e": "Mesa 27",
+  "txk_1f3a": "Mesa 28", "txk_3b5c": "Mesa 29", "txk_5d7e": "Mesa 30",
+  "txk_7f9a": "Mesa 31", "txk_9b1c": "Mesa 32", "txk_1d3e": "Mesa 33",
+  "txk_3f5a": "Mesa 34", "txk_5b7c": "Mesa 35", "txk_7d9e": "Mesa 36",
+  "txk_9f0a": "Mesa 37", "txk_1b3c": "Mesa 38", "txk_3d6e": "Mesa 39",
+  "txk_5f8a": "Mesa 40", "txk_7b0c": "Mesa 41", "txk_9d2e": "Mesa 42",
+  "txk_2f5a": "Mesa 43", "txk_4b7c": "Mesa 44", "txk_6d9e": "Mesa 45",
+  "txk_8f1b": "Mesa 46", "txk_0b3c": "Mesa 47", "txk_2d5e": "Mesa 48",
+  "txk_4f7a": "Mesa 49", "txk_6b9c": "Mesa 50"
+};
+
+// 2. Extraer el token de la URL
+// 2. Extraer el token de la URL
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get('token');
+
+// Permite token seguro o parámetro '?mesa=Mesa 1'
+const mesaIdentificada = TABLE_TOKENS[token] || urlParams.get('mesa') || null;
+
+// 3. Bloqueo de seguridad si la mesa no existe o el token fue inventado
+if (!mesaIdentificada) {
+  document.body.innerHTML = `
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #F7F4EE; padding: 20px; font-family: sans-serif; text-align: center;">
+      <div style="background: white; border: 1px solid #E8E1D3; border-radius: 24px; padding: 32px 24px; max-width: 360px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <p style="font-size: 40px; margin: 0 0 12px 0;">🔒</p>
+        <h2 style="font-size: 18px; font-weight: 800; color: #1C1917; margin: 0 0 8px 0;">Mesa no verificada</h2>
+        <p style="font-size: 13px; color: #78716C; margin: 0; line-height: 1.5;">Por favor, escanea el código QR situado físicamente en tu mesa para acceder a la carta.</p>
+      </div>
+    </div>
+  `;
+  throw new Error("Acceso bloqueado: Mesa o token inválido.");
+}
+
+// 4. Variable unificada que usa todo el resto del archivo
+const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
 
     document.getElementById('mesaBadge').innerHTML = `<span>📍</span> ${mesaActual}`;
     document.getElementById('billMesaTitle').innerText = `${mesaActual} • Consumo activo`;

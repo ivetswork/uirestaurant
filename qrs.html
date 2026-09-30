@@ -55,12 +55,12 @@
           URL base de tu carta (sin ?mesa=):
         </label>
         <input 
-          type="text" 
-          id="baseUrl" 
-          value="https://tuusuario.github.io/index.html" 
-          placeholder="https://tuusuario.github.io/index.html"
-          class="w-full bg-[#FAF7F2] border border-[#E3DAC8] rounded-xl p-2.5 outline-none focus:border-[#B45309] text-[#292524]"
-        >
+  type="text" 
+  id="baseUrl" 
+  value="https://ivetswork.github.io/uirestaurant/index.html" 
+  placeholder="https://ivetswork.github.io/uirestaurant/index.html"
+  class="w-full bg-[#FAF7F2] border border-[#E3DAC8] rounded-xl p-2.5 outline-none focus:border-[#B45309] text-[#292524]"
+>
       </div>
 
       <div class="sm:col-span-3">
@@ -98,6 +98,15 @@
   <main id="qrGrid" class="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6"></main>
 
   <script>
+    // Lista de tokens seguros correspondientes a cada mesa (Mesa 1 = txk_8f1a, etc.)
+    const TABLE_TOKENS_LIST = [
+      "txk_8f1a", "txk_9b2c", "txk_3d4e", "txk_5f6a", "txk_7b8c", "txk_1d2e", "txk_4f5a", "txk_6b7c", "txk_8d9e", "txk_2f3a",
+      "txk_4b5c", "txk_6d7e", "txk_9f1a", "txk_1b2c", "txk_3d5e", "txk_5f7a", "txk_7b9c", "txk_9d1e", "txk_2f4a", "txk_4b6c",
+      "txk_6d8e", "txk_8f0a", "txk_0b2c", "txk_2d4e", "txk_4f6a", "txk_6b8c", "txk_8d0e", "txk_1f3a", "txk_3b5c", "txk_5d7e",
+      "txk_7f9a", "txk_9b1c", "txk_1d3e", "txk_3f5a", "txk_5b7c", "txk_7d9e", "txk_9f0a", "txk_1b3c", "txk_3d6e", "txk_5f8a",
+      "txk_7b0c", "txk_9d2e", "txk_2f5a", "txk_4b7c", "txk_6d9e", "txk_8f1b", "txk_0b3c", "txk_2d5e", "txk_4f7a", "txk_6b9c"
+    ];
+
     function generateQRs() {
       const container = document.getElementById('qrGrid');
       container.innerHTML = '';
@@ -109,7 +118,10 @@
 
       for (let i = 1; i <= total; i++) {
         const mesaName = `Mesa ${i}`;
-        const tableUrl = `${base}?mesa=${encodeURIComponent(mesaName)}`;
+        // Obtenemos el token correspondiente a la mesa actual
+        const token = TABLE_TOKENS_LIST[i - 1] || `txk_${i}`;
+        // El enlace ahora lleva ?token= en lugar de ?mesa=
+        const tableUrl = `${base}?token=${encodeURIComponent(token)}`;
 
         const card = document.createElement('div');
         card.className = "qr-card bg-[#FAF7F2] p-5 rounded-3xl border border-[#E8E1D3] shadow-xs flex flex-col items-center justify-between text-center transition-all";
@@ -146,6 +158,6 @@
 
     // Ejecución inicial automática
     generateQRs();
-  </script>
+</script>
 </body>
 </html>
