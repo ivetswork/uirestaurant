@@ -35,29 +35,46 @@
 </head>
 <body class="bg-[#F7F4EE] text-[#292524] pb-32 min-h-screen">
 
-  <!-- Header Cálido y Elegante -->
-  <header class="bg-[#FAF7F2]/90 backdrop-blur-md text-[#292524] p-4 sticky top-0 z-20 border-b border-[#E8E1D3]">
-    <div class="max-w-md mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-[#EFE9DC] text-[#78350F] flex items-center justify-center text-xl font-bold shadow-xs border border-[#DFD6C3]">
-          ✦
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-base font-extrabold tracking-tight font-serif-title text-[#1C1917]">Carta Digital</h1>
-            <span class="text-[10px] uppercase font-bold tracking-wider bg-[#EFE9DC] text-[#78350F] px-2 py-0.5 rounded-full border border-[#DFD6C3]">Mesa</span>
-          </div>
-          <p class="text-xs text-[#78716C] flex items-center gap-1 font-medium mt-0.5" id="mesaBadge">
-            <span>📍</span> Detectando mesa...
-          </p>
-        </div>
-      </div>
+  <!-- Header Compacto con Márgenes y Altura Unificada -->
+  <header class="bg-[#FAF7F2]/90 backdrop-blur-md text-[#292524] py-3 sticky top-0 z-20 border-b border-[#E8E1D3]">
+    <div class="max-w-md mx-auto px-4 flex items-center justify-between gap-2 box-border">
       
-      <!-- Botón Mi Cuenta -->
-      <button onclick="openBillModal()" class="bg-[#EFE9DC] hover:bg-[#E5DDCB] text-[#44403C] px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-[#DFD6C3] transition-all active:scale-95 shadow-2xs">
-        <span>🧾</span>
-        <span>Mi Cuenta</span>
-      </button>
+      <!-- Zona Izquierda: Número de mesa + Idioma -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- 1. Número de mesa -->
+        <div id="mesaNumberBox" class="h-[38px] w-[38px] rounded-xl bg-[#292524] text-[#FAF7F2] font-black text-xs flex items-center justify-center shadow-xs flex-shrink-0 box-border leading-none">
+          -
+        </div>
+
+        <!-- 2. Selector de idioma -->
+        <select id="langSelect" onchange="changeLanguage(this.value)" class="h-[38px] bg-[#EFE9DC] border border-[#DFD6C3] text-[#44403C] text-xs font-bold rounded-xl px-2 outline-none shadow-2xs cursor-pointer flex-shrink-0 box-border">
+          <option value="es">ES</option>
+          <option value="ca">CA</option>
+          <option value="en">EN</option>
+          <option value="fr">FR</option>
+          <option value="it">IT</option>
+        </select>
+      </div>
+
+      <!-- Zona Derecha: Campana + Mi Cuenta -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <!-- 3. Botón de la Campana -->
+        <button id="callWaiterHeaderBtn" onclick="callWaiter()" title="Llamar al camarero" class="h-[38px] w-[38px] bg-[#EFE9DC] hover:bg-[#E5DDCB] text-[#78350F] border border-[#DFD6C3] rounded-xl text-sm shadow-2xs transition-all active:scale-90 flex items-center justify-center flex-shrink-0 box-border leading-none">
+          🔔
+        </button>
+
+        <!-- 4. Botón Mi Cuenta -->
+        <button onclick="openBillModal()" class="h-[38px] bg-[#EFE9DC] hover:bg-[#E5DDCB] text-[#44403C] px-3 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-[#DFD6C3] transition-all active:scale-95 shadow-2xs flex-shrink-0 box-border leading-none">
+          <span>🧾</span>
+          <span class="hidden sm:inline" id="txt-mi-cuenta">Mi Cuenta</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+ 
+</div>
     </div>
   </header>
 
@@ -101,10 +118,15 @@
           <p class="text-lg font-black text-[#1C1917] tracking-tight" id="cartTotal">0.00 €</p>
         </div>
       </div>
-      <button onclick="openModal()" class="bg-[#B45309] hover:bg-[#92400E] text-white font-bold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2 text-xs uppercase tracking-wider">
-        <span>Ver Comanda</span>
-        <span>→</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="openModal()" class="bg-[#B45309] hover:bg-[#92400E] text-white font-bold px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2 text-xs uppercase tracking-wider">
+          <span>Ver Comanda</span>
+          <span>→</span>
+        </button>
+        <button id="callWaiterBtn" onclick="callWaiter()" title="Llamar al camarero" class="bg-[#EFE9DC] hover:bg-[#E5DDCB] text-[#78350F] border border-[#DFD6C3] p-3 rounded-xl shadow-xs transition-all active:scale-90 flex items-center justify-center text-base">
+          🔔
+        </button>
+      </div>
     </div>
   </div>
 
@@ -161,6 +183,105 @@
     let cart = {};
     let currentCategory = 'Todos';
     let searchQuery = '';
+    let currentLang = 'es';
+
+const TRANSLATIONS = {
+  es: {
+    miCuenta: "Mi Cuenta",
+    camarero: "Camarero",
+    buscar: "Buscar platos, bebidas, postres...",
+    todos: "Todos",
+    bebidas: "Bebidas",
+    tapas: "Tapas",
+    principales: "Principales",
+    postres: "Postres",
+    cargando: "Cargando carta...",
+    verComanda: "Ver Comanda",
+    enviarCocina: "Enviar a Preparación",
+    cuentaAcumulada: "Cuenta Acumulada",
+    totalPagar: "Total a pagar",
+    volver: "Volver a la carta",
+    anadir: "+ Añadir",
+    llamadaConfirm: "¿Deseas llamar al camarero a la",
+    llamadaAviso: "¡Aviso enviado a la barra! Un camarero acudirá enseguida."
+  },
+  ca: {
+    miCuenta: "El Meu Compte",
+    camarero: "Cambrer",
+    buscar: "Cercar plats, begudes, postres...",
+    todos: "Tots",
+    bebidas: "Begudes",
+    tapas: "Tapes",
+    principales: "Principals",
+    postres: "Postres",
+    cargando: "Carregant la carta...",
+    verComanda: "Veure Comanda",
+    enviarCocina: "Enviar a Preparació",
+    cuentaAcumulada: "Compte Acumulat",
+    totalPagar: "Total a pagar",
+    volver: "Tornar a la carta",
+    anadir: "+ Afegir",
+    llamadaConfirm: "Vols cridar el cambrer a la",
+    llamadaAviso: "Avís enviat a la barra! Un cambrer vindrà de seguida."
+  },
+  en: {
+    miCuenta: "My Bill",
+    camarero: "Waiter",
+    buscar: "Search dishes, drinks, desserts...",
+    todos: "All",
+    bebidas: "Drinks",
+    tapas: "Tapas",
+    principales: "Mains",
+    postres: "Desserts",
+    cargando: "Loading menu...",
+    verComanda: "View Order",
+    enviarCocina: "Send to Kitchen",
+    cuentaAcumulada: "Current Bill",
+    totalPagar: "Total due",
+    volver: "Back to menu",
+    anadir: "+ Add",
+    llamadaConfirm: "Do you want to call the waiter to",
+    llamadaAviso: "Notification sent! A waiter will attend to your table shortly."
+  },
+  fr: {
+    miCuenta: "Mon Addition",
+    camarero: "Serveur",
+    buscar: "Rechercher des plats, boissons, desserts...",
+    todos: "Tous",
+    bebidas: "Boissons",
+    tapas: "Tapas",
+    principales: "Plats",
+    postres: "Desserts",
+    cargando: "Chargement du menu...",
+    verComanda: "Voir la commande",
+    enviarCocina: "Envoyer en préparation",
+    cuentaAcumulada: "Addition en cours",
+    totalPagar: "Total à payer",
+    volver: "Retour au menu",
+    anadir: "+ Ajouter",
+    llamadaConfirm: "Voulez-vous appeler le serveur à la",
+    llamadaAviso: "Notification envoyée! Un serveur arrive à votre table."
+  },
+  it: {
+    miCuenta: "Il Mio Conto",
+    camarero: "Cameriere",
+    buscar: "Cerca piatti, bevande, dolci...",
+    todos: "Tutti",
+    bebidas: "Bevande",
+    tapas: "Tapas",
+    principales: "Primi/Secondi",
+    postres: "Dolci",
+    cargando: "Caricamento del menu...",
+    verComanda: "Vedi Ordine",
+    enviarCocina: "Invia in Preparazione",
+    cuentaAcumulada: "Conto Attuale",
+    totalPagar: "Totale da pagare",
+    volver: "Torna al menu",
+    anadir: "+ Aggiungi",
+    llamadaConfirm: "Vuoi chiamare il cameriere al",
+    llamadaAviso: "Avviso inviato! Un cameriere arriverà a breve."
+  }
+};
 
     // 1. Diccionario de tokens únicos para cada mesa (códigos difíciles de adivinar)
 const TABLE_TOKENS = {
@@ -208,7 +329,10 @@ if (!mesaIdentificada) {
 // 4. Variable unificada que usa todo el resto del archivo
 const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
 
-    document.getElementById('mesaBadge').innerHTML = `<span>📍</span> ${mesaActual}`;
+    // Extrae solo los dígitos (ej: de "Mesa 1" toma "1")
+    const numeroMesa = mesaActual.replace(/\D/g, '') || mesaActual;
+    const mesaBox = document.getElementById('mesaNumberBox');
+    if (mesaBox) mesaBox.innerText = numeroMesa;
     document.getElementById('billMesaTitle').innerText = `${mesaActual} • Consumo activo`;
 
     // --- CONTROL DE SEGURIDAD: EXPIRACIÓN DE SESIÓN (60 MINUTOS) ---
@@ -244,6 +368,48 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
           sendBtn.innerText = "Enviar a Preparación";
         }
         return false;
+      }
+    }
+    async function callWaiter() {
+      const btn = document.getElementById('callWaiterHeaderBtn') || document.getElementById('callWaiterBtn');
+      if (btn && btn.dataset.calling === "true") return;
+
+      if (!confirm(`¿Deseas llamar al camarero a la ${mesaActual}?`)) return;
+
+      if (btn) {
+        btn.dataset.calling = "true";
+        btn.innerHTML = `<span>⏳</span> Avisando...`;
+      }
+      
+      const params = new URLSearchParams({
+        action: 'crearPedido',
+        mesa: mesaActual,
+        resumen: '[Bebidas] 🔔 LLAMADA AL CAMARERO',
+        total: '0.00',
+        notas: ''
+      });
+
+      try {
+        await fetch(`${API_URL}?${params.toString()}&_t=${Date.now()}`, {
+          method: 'GET',
+          cache: 'no-store',
+          mode: 'no-cors'
+        });
+
+        if (btn) btn.innerHTML = `<span>✅</span> Avisado`;
+        alert(`¡Aviso enviado a la barra! Un camarero acudirá a la ${mesaActual}.`);
+        setTimeout(() => {
+          if (btn) {
+            btn.innerHTML = `<span>🔔</span> <span class="font-extrabold text-[11px]">Camarero</span>`;
+            btn.dataset.calling = "false";
+          }
+        }, 8000);
+      } catch (err) {
+        if (btn) {
+          btn.innerHTML = `<span>🔔</span> <span class="font-extrabold text-[11px]">Camarero</span>`;
+          btn.dataset.calling = "false";
+        }
+        alert('No se pudo enviar el aviso. Inténtalo de nuevo.');
       }
     }
 
@@ -600,6 +766,49 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
     }
 
     loadProducts();
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      const t = TRANSLATIONS[lang] || TRANSLATIONS.es;
+
+      // 1. Botón Mi Cuenta en la cabecera
+      const elMiCuenta = document.getElementById('txt-mi-cuenta');
+      if (elMiCuenta) elMiCuenta.innerText = t.miCuenta;
+
+      // 2. Buscador
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.placeholder = t.buscar;
+
+      // 3. Botones de Categorías
+      updateCategoryButtonsText();
+
+      // 4. Botón "Ver Comanda" en el carrito flotante
+      const orderBtn = document.querySelector('#cartBar button');
+      if (orderBtn) {
+        orderBtn.innerHTML = `<span>${t.verComanda}</span> <span>→</span>`;
+      }
+
+      // 5. Botón "Enviar a Preparación" en el modal
+      const sendBtn = document.getElementById('sendBtn');
+      if (sendBtn && !sendBtn.disabled) {
+        sendBtn.innerText = t.enviarCocina;
+      }
+
+      // 6. Refrescar listado de platos para traducir "+ Añadir"
+      renderCurrentView();
+    }
+
+    function updateCategoryButtonsText() {
+      const t = TRANSLATIONS[currentLang] || TRANSLATIONS.es;
+      const buttons = document.querySelectorAll('#categoriesBar .cat-btn');
+      
+      const categoryKeys = ['todos', 'bebidas', 'tapas', 'principales', 'postres'];
+      buttons.forEach((btn, index) => {
+        if (categoryKeys[index] && t[categoryKeys[index]]) {
+          btn.innerText = t[categoryKeys[index]];
+        }
+      });
+    }
   </script>
 </body>
 </html>

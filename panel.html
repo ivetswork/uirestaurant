@@ -459,7 +459,8 @@
         const rawDate = ord.Fecha_Hora || ord.fecha_hora || '';
         const totalSecs = calculateElapsedSeconds(rawDate);
         const mins = Math.floor(totalSecs / 60);
-        const isLate = mins >= 10;
+        const isCallingWaiter = (ord.Resumen_Platos || ord.resumen_platos || '').includes('LLAMADA AL CAMARERO');
+        const isLate = !isCallingWaiter && mins >= 10;
         const timeAgo = mins < 1 ? `Hace ${totalSecs}s` : `Hace ${mins} min`;
 
         const id = String(ord.ID_Pedido || ord.id_pedido || ord.ID || 'PED').trim();
@@ -471,22 +472,24 @@
         const allDone = drinks.length > 0 && drinks.every(d => state[d.originalIndex]);
 
         return `
-          <div class="bg-[#FAF7F2] border ${isLate ? 'border-red-400 ring-2 ring-red-400/20' : 'border-[#E8E1D3]'} rounded-3xl p-4 flex flex-col justify-between shadow-xs">
+          <div class="bg-[#FAF7F2] border ${isCallingWaiter ? 'border-amber-500 ring-2 ring-amber-400/40' : (isLate ? 'border-red-400 ring-2 ring-red-400/20' : 'border-[#E8E1D3]')} rounded-3xl p-4 flex flex-col justify-between shadow-xs">
             <div>
               <div class="flex justify-between items-center border-b border-[#E8E1D3] pb-3 mb-3">
-                <span class="text-base font-black ${isLate ? 'bg-red-600 text-white' : 'bg-[#292524] text-white'} px-3.5 py-1 rounded-xl">
+                <span class="text-base font-black ${isCallingWaiter ? 'bg-amber-600 text-white' : (isLate ? 'bg-red-600 text-white' : 'bg-[#292524] text-white')} px-3.5 py-1 rounded-xl">
                   ${mesa}
                 </span>
-                <span class="text-xs font-extrabold ${isLate ? 'text-red-600' : 'text-[#B45309]'}">
-                  ⏱️ ${timeAgo}
+                <span class="text-xs font-extrabold ${isCallingWaiter ? 'text-amber-700' : (isLate ? 'text-red-600' : 'text-[#B45309]')}">
+                  ${isCallingWaiter ? '🔔 AVISO SALA' : `⏱️ ${timeAgo}`}
                 </span>
               </div>
 
               <div class="bg-white border border-[#E8E1D3] rounded-2xl p-2.5 mb-3 space-y-1.5">
-                <div class="flex items-center gap-1.5 pb-1 border-b border-[#EFE9DC] text-[#78716C]">
-                  <span class="text-xs">🍸</span>
-                  <span class="text-[10px] font-black uppercase tracking-wider">Bebidas a servir</span>
-                </div>
+                ${!isCallingWaiter ? `
+                  <div class="flex items-center gap-1.5 pb-1 border-b border-[#EFE9DC] text-[#78716C]">
+                    <span class="text-xs">🍸</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider">Bebidas a servir</span>
+                  </div>
+                ` : ''}
                 ${drinks.map(d => {
                   const done = !!state[d.originalIndex];
                   return `
@@ -500,7 +503,7 @@
                 }).join('')}
               </div>
 
-              ${notas ? `
+              ${notas && !isCallingWaiter ? `
                 <div class="bg-[#FFFBEB] border border-[#FDE68A] rounded-2xl p-2.5 text-xs text-[#92400E] mb-3">
                   <span class="font-black uppercase tracking-wider block mb-0.5">⚠️ Nota:</span>
                   <span class="font-medium">${notas}</span>
@@ -511,7 +514,7 @@
             <div class="pt-3 border-t border-[#E8E1D3] flex justify-between items-center">
               <span class="text-[11px] text-[#A8A29E] font-mono font-bold">${id}</span>
               <button onclick="markBarDone(${row}, '${id}')" class="${allDone ? 'bg-emerald-700 hover:bg-emerald-800' : 'bg-[#292524] hover:bg-[#1C1917]'} text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all active:scale-95">
-                ${allDone ? 'Ronda Servida' : 'Servir Todo'}
+                ${allDone ? 'Ronda Servida' : 'Atendido'}
               </button>
             </div>
           </div>
