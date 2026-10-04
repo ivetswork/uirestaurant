@@ -480,12 +480,14 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
         });
       }
 
-      // 3. Filtrado por texto en el buscador
+      // 3. Filtrado por texto en el buscador considerando traducciones
       if (searchQuery) {
+        const langSuffix = currentLang !== 'es' ? `_${currentLang.toUpperCase()}` : '';
         filtered = filtered.filter(p => {
-          const n = (p.Nombre || p.nombre || '').toLowerCase();
-          const d = (p.Descripcion || p.descripcion || '').toLowerCase();
-          return n.includes(searchQuery) || d.includes(searchQuery);
+          const n = String(p[`Nombre${langSuffix}`] || p.Nombre || p.nombre || '').toLowerCase();
+          const d = String(p[`Descripcion${langSuffix}`] || p.Descripcion || p.descripcion || '').toLowerCase();
+          const nEs = String(p.Nombre || p.nombre || '').toLowerCase();
+          return n.includes(searchQuery) || d.includes(searchQuery) || nEs.includes(searchQuery);
         });
       }
 
@@ -504,13 +506,15 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
         return;
       }
 
-      // Cambia a true si en el futuro quieres volver a mostrar las fotos
       const mostrarFotos = false;
+      const langSuffix = currentLang !== 'es' ? `_${currentLang.toUpperCase()}` : '';
 
       container.innerHTML = list.map(p => {
         const id = String(p.ID_Producto || p.id_producto || p.Nombre);
-        const nombre = p.Nombre || p.nombre || '';
-        const desc = p.Descripcion || p.descripcion || '';
+        
+        // Toma el idioma seleccionado (ej: Nombre_CA, Nombre_EN...) o recurre al español por defecto
+        const nombre = p[`Nombre${langSuffix}`] || p.Nombre || p.nombre || '';
+        const desc = p[`Descripcion${langSuffix}`] || p.Descripcion || p.descripcion || '';
         const precio = parseFloat(p.Precio || p.precio || 0).toFixed(2);
         const img = p.Imagen || p.imagen || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c';
         const qty = cart[id] || 0;
@@ -820,8 +824,8 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
 
       const structuredItems = Object.keys(cart).map(id => {
         const p = products.find(prod => String(prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
+        // Siempre envía el nombre base en español al panel y a la hoja de pedidos
         const name = p ? (p.Nombre || p.nombre) : id;
-        // Limpia la categoría para enviarla sin espacios extra
         const cat = p ? String(p.Categoria || p.categoria || 'General').trim() : 'General';
         return `[${cat}] ${cart[id]}x ${name}`;
       }).join(' | ');
