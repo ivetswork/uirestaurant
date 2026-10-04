@@ -821,7 +821,8 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
       const structuredItems = Object.keys(cart).map(id => {
         const p = products.find(prod => String(prod.ID_Producto || prod.id_producto || prod.Nombre) === id);
         const name = p ? (p.Nombre || p.nombre) : id;
-        const cat = p ? (p.Categoria || p.categoria || 'Tapas') : 'Tapas';
+        // Limpia la categoría para enviarla sin espacios extra
+        const cat = p ? String(p.Categoria || p.categoria || 'General').trim() : 'General';
         return `[${cat}] ${cart[id]}x ${name}`;
       }).join(' | ');
 

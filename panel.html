@@ -212,6 +212,9 @@
     }
 
     /* --- PARSEADORES DE PLATOS Y BEBIDAS --- */
+    /* Categorías exclusivas que pertenecen a la Barra */
+    const BAR_CATEGORIES = ['bebidas', 'bebida', 'vinos', 'vino', 'postres', 'postre', 'bar', 'cafes', 'cafés'];
+
     function parseKitchenCategories(resumenStr) {
       if (!resumenStr) return { tapas: [], platos: [], postres: [] };
       const raw = resumenStr.includes('|') ? resumenStr.split('|') : resumenStr.split(',');
@@ -220,23 +223,31 @@
       raw.forEach((it, idx) => {
         const t = it.trim();
         if (!t) return;
+
+        // Si es aviso al camarero, va únicamente a barra
+        if (t.includes('LLAMADA AL CAMARERO')) return;
+
         if (t.startsWith('[')) {
           const cb = t.indexOf(']');
           if (cb !== -1) {
-            const cat = t.substring(1, cb).toLowerCase();
+            const cat = t.substring(1, cb).trim().toLowerCase();
             const text = t.substring(cb + 1).trim();
-            // Descartamos bebidas Y postres en cocina
-            if (cat.includes('beb') || cat.includes('bar') || cat.includes('vin') || cat.includes('cervez') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa') || cat.includes('postre')) return;
-            if (cat.includes('tapa')) res.tapas.push({ originalIndex: idx, texto: text });
-            else res.platos.push({ originalIndex: idx, texto: text });
+
+            // Si es categoría de barra (bebidas, vinos, postres), se excluye de cocina
+            if (BAR_CATEGORIES.some(bc => cat.includes(bc))) return;
+
+            // Clasificación dentro de cocina
+            if (cat.includes('tapa') || cat.includes('picar') || cat.includes('entrante')) {
+              res.tapas.push({ originalIndex: idx, texto: text });
+            } else {
+              res.platos.push({ originalIndex: idx, texto: text });
+            }
             return;
           }
         }
-        const low = t.toLowerCase();
-        // Descartamos bebidas y postres por palabras clave
-        if (low.includes('caña') || low.includes('cerveza') || low.includes('vino') || low.includes('agua') || low.includes('refresco') || low.includes('coca') || low.includes('fanta') || low.includes('copa') || low.includes('café') || low.includes('cafe') || low.includes('postre') || low.includes('tarta') || low.includes('helado') || low.includes('flan') || low.includes('coulant')) return;
-        if (low.includes('tapa') || low.includes('brava') || low.includes('croqueta')) res.tapas.push({ originalIndex: idx, texto: t });
-        else res.platos.push({ originalIndex: idx, texto: t });
+
+        // Si no tiene corchetes (pedidos antiguos o manuales)
+        res.platos.push({ originalIndex: idx, texto: t });
       });
       return res;
     }
@@ -249,27 +260,30 @@
       raw.forEach((it, idx) => {
         const t = it.trim();
         if (!t) return;
+
+        // Las llamadas al camarero siempre van a barra
+        if (t.includes('LLAMADA AL CAMARERO')) {
+          drinks.push({ originalIndex: idx, texto: t.replace(/\[.*?\]/, '').trim() });
+          return;
+        }
+
+        // Enrutamiento estricto por categoría entre corchetes
         if (t.startsWith('[')) {
           const cb = t.indexOf(']');
           if (cb !== -1) {
-            const cat = t.substring(1, cb).toLowerCase();
+            const cat = t.substring(1, cb).trim().toLowerCase();
             const text = t.substring(cb + 1).trim();
-            // Incluye bebidas, vinos y postres en barra
-            if (cat.includes('beb') || cat.includes('bar') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa') || cat.includes('vin') || cat.includes('cervez') || cat.includes('postre')) {
+
+            // Solo entra a barra si su categoría en Google Sheets es Bebidas, Vinos o Postres
+            if (BAR_CATEGORIES.some(bc => cat.includes(bc))) {
               drinks.push({ originalIndex: idx, texto: text });
-              return;
             }
           }
-        }
-        const low = t.toLowerCase();
-        const kw = ['caña', 'cerveza', 'vino', 'agua', 'refresco', 'coca', 'fanta', 'nestea', 'aquarius', 'sprite', 'copa', 'café', 'cafe', 'cortado', 'poleo', 'infusion', 'te', 'vermut', 'tinto', 'postre', 'tarta', 'helado', 'flan', 'coulant'];
-        if (kw.some(k => low.includes(k))) {
-          drinks.push({ originalIndex: idx, texto: t.replace(/\[.*?\]/, '').trim() });
         }
       });
       return drinks;
     }
-
+    
     async function fetchOrders() {
       try {
         const antiCache = `${API_URL}?action=getPedidos&_t=${Date.now()}&r=${Math.random()}`;
