@@ -110,7 +110,6 @@
     setInterval(() => {
       const clockEl = document.getElementById('clock');
       if (clockEl) clockEl.innerText = new Date().toLocaleTimeString('es-ES');
-      renderCurrentView();
     }, 1000);
 
     function switchView(view) {
@@ -283,22 +282,30 @@
       });
       return drinks;
     }
-    
+
     async function fetchOrders() {
       try {
         const antiCache = `${API_URL}?action=getPedidos&_t=${Date.now()}&r=${Math.random()}`;
-        const res = await fetch(antiCache, { method: 'GET', cache: 'no-store', redirect: 'follow' });
+        const res = await fetch(antiCache, { 
+          method: 'GET', 
+          cache: 'no-store', 
+          redirect: 'follow' 
+        });
+        
+        if (!res.ok) return;
         const data = await res.json();
 
-        currentOrders = (Array.isArray(data) ? data : []).filter(o => {
-          const mesa = String(o.Mesa || o.mesa || '').trim().toLowerCase();
-          return !locallyPaidTables.has(mesa);
-        });
+        if (Array.isArray(data)) {
+          currentOrders = data.filter(o => {
+            const mesa = String(o.Mesa || o.mesa || '').trim().toLowerCase();
+            return !locallyPaidTables.has(mesa);
+          });
 
-        updateBadges();
-        renderCurrentView();
+          updateBadges();
+          renderCurrentView();
+        }
       } catch (err) {
-        console.error("Error al consultar pedidos:", err);
+        console.error("Error al consultar pedidos en segundo plano:", err);
       }
     }
 
