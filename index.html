@@ -73,27 +73,31 @@
     </div>
   </header>
 
- 
-</div>
-    </div>
-  </header>
-
   <main class="max-w-md mx-auto p-4 space-y-4">
 
     <!-- Buscador interactivo rápido -->
     <div class="relative">
-      <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Buscar platos, bebidas, postres..." class="w-full bg-[#FAF7F2] border border-[#E3DAC8] rounded-2xl py-3 pl-10 pr-4 text-xs font-medium placeholder-[#A8A29E] text-[#292524] outline-none focus:border-[#B45309] focus:ring-2 focus:ring-[#B45309]/10 transition-all shadow-2xs">
+      <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Buscar platos..." class="w-full bg-[#FAF7F2] border border-[#E3DAC8] rounded-2xl py-3 pl-10 pr-4 text-xs font-medium placeholder-[#A8A29E] text-[#292524] outline-none focus:border-[#B45309] focus:ring-2 focus:ring-[#B45309]/10 transition-all shadow-2xs">
       <span class="absolute left-3.5 top-3.5 text-[#A8A29E] text-xs">🔍</span>
       <button id="clearSearch" onclick="clearSearchInput()" class="hidden absolute right-3.5 top-3 text-[#A8A29E] hover:text-[#44403C] text-xs font-bold">✕</button>
     </div>
 
     <!-- Barra de Categorías Dinámica -->
     <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none" id="categoriesBar">
-      <button onclick="filterCategory('Todos')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#292524] text-[#FAF7F2] shadow-xs transition-all flex-shrink-0 active:scale-95">Todos</button>
-      <button onclick="filterCategory('Bebidas')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Bebidas</button>
-      <button onclick="filterCategory('Tapas')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Tapas</button>
-      <button onclick="filterCategory('Raciones')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Principales</button>
-      <button onclick="filterCategory('Postres')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Postres</button>
+      <!-- "Todos" escondido (solo quita 'hidden' para recuperarlo) -->
+      <button onclick="filterCategory('Todos')" class="cat-btn hidden px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Todos</button>
+      
+      <!-- Entrantes seleccionado por defecto al entrar -->
+      <button onclick="filterCategory('Entrantes')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#292524] text-[#FAF7F2] shadow-xs transition-all flex-shrink-0 active:scale-95">Entrantes</button>
+      <button onclick="filterCategory('Para picar')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Para picar</button>
+      <button onclick="filterCategory('Arroces')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Arroces</button>
+      <button onclick="filterCategory('Carnes')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Carnes</button>
+      <button onclick="filterCategory('Pescados')" class="cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Pescados</button>
+
+      <!-- Otras secciones ocultas temporalmente -->
+      <button onclick="filterCategory('Bebidas')" class="cat-btn hidden px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Bebidas</button>
+      <button onclick="filterCategory('Vinos')" class="cat-btn hidden px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Vinos</button>
+      <button onclick="filterCategory('Postres')" class="cat-btn hidden px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8] transition-all flex-shrink-0 active:scale-95">Postres</button>
     </div>
 
     <!-- Estado de Carga -->
@@ -181,7 +185,7 @@
 
     let products = [];
     let cart = {};
-    let currentCategory = 'Todos';
+    let currentCategory = 'Entrantes';
     let searchQuery = '';
     let currentLang = 'es';
 
@@ -189,18 +193,19 @@ const TRANSLATIONS = {
   es: {
     miCuenta: "Mi Cuenta",
     camarero: "Camarero",
-    buscar: "Buscar platos, bebidas, postres...",
+    buscar: "Buscar platos...",
     todos: "Todos",
+    entrantes: "Entrantes",
+    paraPicar: "Para picar",
+    arroces: "Arroces",
+    carnes: "Carnes",
+    pescados: "Pescados",
     bebidas: "Bebidas",
-    tapas: "Tapas",
-    principales: "Principales",
+    vinos: "Vinos",
     postres: "Postres",
     cargando: "Cargando carta...",
     verComanda: "Ver Comanda",
     enviarCocina: "Enviar a Preparación",
-    cuentaAcumulada: "Cuenta Acumulada",
-    totalPagar: "Total a pagar",
-    volver: "Volver a la carta",
     anadir: "+ Añadir",
     llamadaConfirm: "¿Deseas llamar al camarero a la",
     llamadaAviso: "¡Aviso enviado a la barra! Un camarero acudirá enseguida."
@@ -208,18 +213,19 @@ const TRANSLATIONS = {
   ca: {
     miCuenta: "El Meu Compte",
     camarero: "Cambrer",
-    buscar: "Cercar plats, begudes, postres...",
+    buscar: "Cercar plats...",
     todos: "Tots",
+    entrantes: "Entrants",
+    paraPicar: "Per picar",
+    arroces: "Arrossos",
+    carnes: "Carns",
+    pescados: "Peixos",
     bebidas: "Begudes",
-    tapas: "Tapes",
-    principales: "Principals",
+    vinos: "Vins",
     postres: "Postres",
     cargando: "Carregant la carta...",
     verComanda: "Veure Comanda",
     enviarCocina: "Enviar a Preparació",
-    cuentaAcumulada: "Compte Acumulat",
-    totalPagar: "Total a pagar",
-    volver: "Tornar a la carta",
     anadir: "+ Afegir",
     llamadaConfirm: "Vols cridar el cambrer a la",
     llamadaAviso: "Avís enviat a la barra! Un cambrer vindrà de seguida."
@@ -227,18 +233,19 @@ const TRANSLATIONS = {
   en: {
     miCuenta: "My Bill",
     camarero: "Waiter",
-    buscar: "Search dishes, drinks, desserts...",
+    buscar: "Search dishes...",
     todos: "All",
+    entrantes: "Starters",
+    paraPicar: "Finger Food",
+    arroces: "Rice Dishes",
+    carnes: "Meats",
+    pescados: "Fish",
     bebidas: "Drinks",
-    tapas: "Tapas",
-    principales: "Mains",
+    vinos: "Wines",
     postres: "Desserts",
     cargando: "Loading menu...",
     verComanda: "View Order",
     enviarCocina: "Send to Kitchen",
-    cuentaAcumulada: "Current Bill",
-    totalPagar: "Total due",
-    volver: "Back to menu",
     anadir: "+ Add",
     llamadaConfirm: "Do you want to call the waiter to",
     llamadaAviso: "Notification sent! A waiter will attend to your table shortly."
@@ -246,18 +253,19 @@ const TRANSLATIONS = {
   fr: {
     miCuenta: "Mon Addition",
     camarero: "Serveur",
-    buscar: "Rechercher des plats, boissons, desserts...",
+    buscar: "Rechercher des plats...",
     todos: "Tous",
+    entrantes: "Entrées",
+    paraPicar: "À grignoter",
+    arroces: "Riz",
+    carnes: "Viandes",
+    pescados: "Poissons",
     bebidas: "Boissons",
-    tapas: "Tapas",
-    principales: "Plats",
+    vinos: "Vins",
     postres: "Desserts",
     cargando: "Chargement du menu...",
     verComanda: "Voir la commande",
     enviarCocina: "Envoyer en préparation",
-    cuentaAcumulada: "Addition en cours",
-    totalPagar: "Total à payer",
-    volver: "Retour au menu",
     anadir: "+ Ajouter",
     llamadaConfirm: "Voulez-vous appeler le serveur à la",
     llamadaAviso: "Notification envoyée! Un serveur arrive à votre table."
@@ -265,18 +273,19 @@ const TRANSLATIONS = {
   it: {
     miCuenta: "Il Mio Conto",
     camarero: "Cameriere",
-    buscar: "Cerca piatti, bevande, dolci...",
+    buscar: "Cerca piatti...",
     todos: "Tutti",
+    entrantes: "Antipasti",
+    paraPicar: "Stuzzichini",
+    arroces: "Primi di Riso",
+    carnes: "Carni",
+    pescados: "Pesce",
     bebidas: "Bevande",
-    tapas: "Tapas",
-    principales: "Primi/Secondi",
+    vinos: "Vini",
     postres: "Dolci",
     cargando: "Caricamento del menu...",
     verComanda: "Vedi Ordine",
     enviarCocina: "Invia in Preparazione",
-    cuentaAcumulada: "Conto Attuale",
-    totalPagar: "Totale da pagare",
-    volver: "Torna al menu",
     anadir: "+ Aggiungi",
     llamadaConfirm: "Vuoi chiamare il cameriere al",
     llamadaAviso: "Avviso inviato! Un cameriere arriverà a breve."
@@ -336,7 +345,8 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
     document.getElementById('billMesaTitle').innerText = `${mesaActual} • Consumo activo`;
 
     // --- CONTROL DE SEGURIDAD: EXPIRACIÓN DE SESIÓN (60 MINUTOS) ---
-    const MAX_SESSION_MINUTES = 60;
+    // --- CONTROL DE SEGURIDAD: EXPIRACIÓN DE SESIÓN (180 MINUTOS) ---
+    const MAX_SESSION_MINUTES = 180;
 
     function checkSessionValidity() {
       const now = Date.now();
@@ -349,7 +359,18 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
       }
 
       const elapsedMinutes = (now - parseInt(savedTime, 10)) / 60000;
-      return elapsedMinutes < MAX_SESSION_MINUTES;
+      
+      // Si la sesión caducó por inactividad prolongada
+      if (elapsedMinutes >= MAX_SESSION_MINUTES) {
+        return false;
+      }
+
+      return true;
+    }
+
+    // Al entrar con un QR válido o token, resetea el contador para empezar limpio
+    if (new URLSearchParams(window.location.search).get('token')) {
+      localStorage.setItem(`qr_session_${mesaActual}`, Date.now());
     }
 
     function lockIfExpired() {
@@ -441,17 +462,25 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
       handleSearch('');
     }
 
-    function renderCurrentView() {
-      let filtered = products;
+    // Lista de categorías que no se deben mostrar por el momento
+    const HIDDEN_CATEGORIES = ['bebidas', 'vinos', 'postres'];
 
+    function renderCurrentView() {
+      // 1. Ocultar platos de bebidas, vinos y postres de la vista
+      let filtered = products.filter(p => {
+        const cat = (p.Categoria || p.categoria || '').trim().toLowerCase();
+        return !HIDDEN_CATEGORIES.includes(cat);
+      });
+
+      // 2. Filtrado por pestaña seleccionada
       if (currentCategory !== 'Todos') {
-        filtered = products.filter(p => {
-          const cat = (p.Categoria || p.categoria || '').toLowerCase();
-          if (currentCategory === 'Raciones') return cat.includes('racion') || cat.includes('plato') || cat.includes('principal');
+        filtered = filtered.filter(p => {
+          const cat = (p.Categoria || p.categoria || '').trim().toLowerCase();
           return cat.includes(currentCategory.toLowerCase());
         });
       }
 
+      // 3. Filtrado por texto en el buscador
       if (searchQuery) {
         filtered = filtered.filter(p => {
           const n = (p.Nombre || p.nombre || '').toLowerCase();
@@ -475,6 +504,9 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
         return;
       }
 
+      // Cambia a true si en el futuro quieres volver a mostrar las fotos
+      const mostrarFotos = false;
+
       container.innerHTML = list.map(p => {
         const id = String(p.ID_Producto || p.id_producto || p.Nombre);
         const nombre = p.Nombre || p.nombre || '';
@@ -485,14 +517,18 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
 
         return `
           <div class="bg-[#FAF7F2] rounded-2xl p-3 flex gap-3.5 items-center border border-[#E8E1D3] shadow-xs hover:border-[#D5C9B3] hover:shadow-sm transition-all duration-200">
-            <div class="relative overflow-hidden rounded-xl flex-shrink-0">
-              <img src="${img}" alt="${nombre}" class="w-20 h-20 object-cover bg-[#EFE9DC]">
-            </div>
+            
+            ${mostrarFotos ? `
+              <div class="relative overflow-hidden rounded-xl flex-shrink-0">
+                <img src="${img}" alt="${nombre}" class="w-20 h-20 object-cover bg-[#EFE9DC]">
+              </div>
+            ` : ''}
             
             <div class="flex-1 min-w-0">
-  <h3 class="font-bold text-xs sm:text-sm text-[#1C1917] leading-snug line-clamp-2 tracking-tight">${nombre}</h3>${desc ? `<p class="text-[11px] text-[#78716C] truncate my-0.5 leading-relaxed">${desc}</p>` : ''}
-  <p class="font-black text-[#B45309] text-xs sm:text-sm mt-1">${precio} €</p>
-</div>
+              <h3 class="font-bold text-xs sm:text-sm text-[#1C1917] leading-snug line-clamp-2 tracking-tight">${nombre}</h3>
+              ${desc ? `<p class="text-[11px] text-[#78716C] truncate my-0.5 leading-relaxed">${desc}</p>` : ''}
+              <p class="font-black text-[#B45309] text-xs sm:text-sm mt-1">${precio} €</p>
+            </div>
             
             <div class="flex items-center gap-1.5 flex-shrink-0">
               ${qty > 0 ? `
@@ -505,7 +541,7 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
                 </button>
               ` : `
                 <button onclick="modifyQty('${encodeURIComponent(id)}', 1, event)" class="bg-[#FAF7F2] hover:bg-[#292524] hover:text-[#FAF7F2] text-[#44403C] border border-[#D5C9B3] font-bold px-3 py-2 rounded-xl text-xs transition-all active:scale-95 shadow-2xs">
-                  + Añadir
+                  ${TRANSLATIONS[currentLang]?.anadir || '+ Añadir'}
                 </button>
               `}
             </div>
@@ -652,14 +688,18 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
       document.getElementById('orderModal').classList.add('hidden');
     }
 
-    async function openBillModal() {
-      const modal = document.getElementById('billModal');
+    let billPollingTimer = null;
+
+    // Función que consulta y refresca la cuenta sin parpadeos
+    async function refreshBillData(isFirstLoad = false) {
       const content = document.getElementById('billContent');
       const totalDisplay = document.getElementById('billGrandTotal');
+      if (!content || !totalDisplay) return;
 
-      modal.classList.remove('hidden');
-      content.innerHTML = '<p class="text-center py-6 text-[#A8A29E] text-xs">Consultando consumos activos...</p>';
-      totalDisplay.innerText = '0.00 €';
+      if (isFirstLoad) {
+        content.innerHTML = '<p class="text-center py-6 text-[#A8A29E] text-xs">Consultando consumos activos...</p>';
+        totalDisplay.innerText = '0.00 €';
+      }
 
       try {
         const res = await fetch(`${API_URL}?action=getCuentaMesa&mesa=${encodeURIComponent(mesaActual)}&_t=${Date.now()}`, { 
@@ -688,11 +728,49 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
           const hora = (ord.Fecha_Hora || ord.fecha_hora || '').split('T')[1]?.substring(0, 5) || 
                        (ord.Fecha_Hora || ord.fecha_hora || '').split(' ')[1]?.substring(0, 5) || '';
 
+          const estCocina = String(ord.Estado_Cocina || ord.estado_cocina || '').trim();
+          const estBarra = String(ord.Estado_Barra || ord.estado_barra || '').trim().toLowerCase();
+          const isLlamada = (ord.Resumen_Platos || ord.resumen_platos || '').includes('LLAMADA AL CAMARERO');
+
+          // Lógica de estados considerando si es llamada de barra o pedido con cocina
+          let badgeHtml = '';
+          const barraLista = (estBarra === 'listo');
+          const cocinaLista = (estCocina === 'Listo');
+
+          if (isLlamada) {
+            // Si es aviso a camarero, solo depende del estado de barra
+            if (barraLista) {
+              badgeHtml = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 flex items-center gap-1">✓ Atendido</span>`;
+            } else {
+              badgeHtml = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 flex items-center gap-1">⏳ Avisado...</span>`;
+            }
+          } else {
+            // Para pedidos normales de comida/bebida
+            const hayBebidas = (ord.Resumen_Platos || ord.resumen_platos || '').toLowerCase().includes('[bebidas]');
+            const hayComida = !hayBebidas || (ord.Resumen_Platos || ord.resumen_platos || '').includes('[Tapas]') || (ord.Resumen_Platos || ord.resumen_platos || '').includes('[Raciones]') || (ord.Resumen_Platos || ord.resumen_platos || '').includes('[Postres]');
+
+            const finBarra = !hayBebidas || barraLista;
+            const finCocina = !hayComida || cocinaLista;
+
+            if (finBarra && finCocina) {
+              badgeHtml = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 flex items-center gap-1">✓ Entregado</span>`;
+            } else if (estCocina === 'En preparación' || estBarra === 'en preparación') {
+              badgeHtml = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800 flex items-center gap-1 animate-pulse">👨‍🍳 En preparación...</span>`;
+            } else {
+              badgeHtml = `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-stone-200 text-stone-700 flex items-center gap-1">⏳ Pendiente...</span>`;
+            }
+          }
+
           return `
-            <div class="bg-[#FAF7F2] border border-[#E8E1D3] rounded-2xl p-3 shadow-2xs">
-              <div class="flex justify-between items-center border-b border-[#E8E1D3] pb-1.5 mb-2">
-                <span class="text-xs font-bold text-[#1C1917]">Ronda #${idx + 1} ${hora ? `(${hora})` : ''}</span>
-                <span class="text-xs font-black text-[#B45309]">${ordTotal.toFixed(2)} €</span>
+            <div class="bg-[#FAF7F2] border border-[#E8E1D3] rounded-2xl p-3.5 shadow-2xs space-y-2">
+              <div class="flex justify-between items-center border-b border-[#E8E1D3] pb-2">
+                <div>
+                  <span class="text-xs font-bold text-[#1C1917]">Ronda #${idx + 1} ${hora ? `(${hora})` : ''}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  ${badgeHtml}
+                  <span class="text-xs font-black text-[#B45309]">${ordTotal.toFixed(2)} €</span>
+                </div>
               </div>
               <ul class="text-[11px] text-[#57534E] space-y-1">
                 ${rawItems.map(item => {
@@ -710,8 +788,24 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
       }
     }
 
+    function openBillModal() {
+      const modal = document.getElementById('billModal');
+      modal.classList.remove('hidden');
+      refreshBillData(true);
+
+      // Inicia el refresco silencioso cada 3.5 segundos sin reiniciar la ventana
+      if (billPollingTimer) clearInterval(billPollingTimer);
+      billPollingTimer = setInterval(() => {
+        refreshBillData(false);
+      }, 3500);
+    }
+
     function closeBillModal() {
       document.getElementById('billModal').classList.add('hidden');
+      if (billPollingTimer) {
+        clearInterval(billPollingTimer);
+        billPollingTimer = null;
+      }
     }
 
     async function submitOrder() {
@@ -798,17 +892,58 @@ const mesaActual = decodeURIComponent(mesaIdentificada).replace('!', '').trim();
       renderCurrentView();
     }
 
+    const CATEGORY_MAP = [
+      'Todos', 
+      'Entrantes', 
+      'Para picar', 
+      'Arroces', 
+      'Carnes', 
+      'Pescados', 
+      'Bebidas', 
+      'Vinos', 
+      'Postres'
+    ];
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      const buttons = document.querySelectorAll('#categoriesBar .cat-btn');
+
+      buttons.forEach((btn, index) => {
+        const isSelected = CATEGORY_MAP[index] === cat;
+        if (isSelected) {
+          btn.className = btn.className.replace('bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8]', 'bg-[#292524] text-[#FAF7F2] shadow-xs');
+        } else {
+          btn.className = btn.className.replace('bg-[#292524] text-[#FAF7F2] shadow-xs', 'bg-[#FAF7F2] text-[#57534E] border border-[#E3DAC8]');
+        }
+      });
+
+      renderCurrentView();
+    }
+
     function updateCategoryButtonsText() {
       const t = TRANSLATIONS[currentLang] || TRANSLATIONS.es;
       const buttons = document.querySelectorAll('#categoriesBar .cat-btn');
       
-      const categoryKeys = ['todos', 'bebidas', 'tapas', 'principales', 'postres'];
+      const categoryKeys = [
+        'todos', 
+        'entrantes', 
+        'paraPicar', 
+        'arroces', 
+        'carnes', 
+        'pescados', 
+        'bebidas', 
+        'vinos', 
+        'postres'
+      ];
+
       buttons.forEach((btn, index) => {
         if (categoryKeys[index] && t[categoryKeys[index]]) {
           btn.innerText = t[categoryKeys[index]];
         }
       });
     }
+    
   </script>
+  
 </body>
 </html>

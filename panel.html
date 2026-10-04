@@ -225,18 +225,17 @@
           if (cb !== -1) {
             const cat = t.substring(1, cb).toLowerCase();
             const text = t.substring(cb + 1).trim();
-            // Descartamos bebidas en cocina
-            if (cat.includes('beb') || cat.includes('bar') || cat.includes('vin') || cat.includes('cervez') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa')) return;
+            // Descartamos bebidas Y postres en cocina
+            if (cat.includes('beb') || cat.includes('bar') || cat.includes('vin') || cat.includes('cervez') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa') || cat.includes('postre')) return;
             if (cat.includes('tapa')) res.tapas.push({ originalIndex: idx, texto: text });
-            else if (cat.includes('postre')) res.postres.push({ originalIndex: idx, texto: text });
             else res.platos.push({ originalIndex: idx, texto: text });
             return;
           }
         }
         const low = t.toLowerCase();
-        if (low.includes('caña') || low.includes('cerveza') || low.includes('vino') || low.includes('agua') || low.includes('refresco') || low.includes('coca') || low.includes('fanta') || low.includes('copa') || low.includes('café') || low.includes('cafe')) return;
+        // Descartamos bebidas y postres por palabras clave
+        if (low.includes('caña') || low.includes('cerveza') || low.includes('vino') || low.includes('agua') || low.includes('refresco') || low.includes('coca') || low.includes('fanta') || low.includes('copa') || low.includes('café') || low.includes('cafe') || low.includes('postre') || low.includes('tarta') || low.includes('helado') || low.includes('flan') || low.includes('coulant')) return;
         if (low.includes('tapa') || low.includes('brava') || low.includes('croqueta')) res.tapas.push({ originalIndex: idx, texto: t });
-        else if (low.includes('postre') || low.includes('tarta') || low.includes('helado')) res.postres.push({ originalIndex: idx, texto: t });
         else res.platos.push({ originalIndex: idx, texto: t });
       });
       return res;
@@ -255,14 +254,15 @@
           if (cb !== -1) {
             const cat = t.substring(1, cb).toLowerCase();
             const text = t.substring(cb + 1).trim();
-            if (cat.includes('beb') || cat.includes('bar') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa') || cat.includes('vin') || cat.includes('cervez')) {
+            // Incluye bebidas, vinos y postres en barra
+            if (cat.includes('beb') || cat.includes('bar') || cat.includes('refres') || cat.includes('caf') || cat.includes('copa') || cat.includes('vin') || cat.includes('cervez') || cat.includes('postre')) {
               drinks.push({ originalIndex: idx, texto: text });
               return;
             }
           }
         }
         const low = t.toLowerCase();
-        const kw = ['caña', 'cerveza', 'vino', 'agua', 'refresco', 'coca', 'fanta', 'nestea', 'aquarius', 'sprite', 'copa', 'café', 'cafe', 'cortado', 'poleo', 'infusion', 'te', 'vermut', 'tinto'];
+        const kw = ['caña', 'cerveza', 'vino', 'agua', 'refresco', 'coca', 'fanta', 'nestea', 'aquarius', 'sprite', 'copa', 'café', 'cafe', 'cortado', 'poleo', 'infusion', 'te', 'vermut', 'tinto', 'postre', 'tarta', 'helado', 'flan', 'coulant'];
         if (kw.some(k => low.includes(k))) {
           drinks.push({ originalIndex: idx, texto: t.replace(/\[.*?\]/, '').trim() });
         }
@@ -487,7 +487,7 @@
                 ${!isCallingWaiter ? `
                   <div class="flex items-center gap-1.5 pb-1 border-b border-[#EFE9DC] text-[#78716C]">
                     <span class="text-xs">🍸</span>
-                    <span class="text-[10px] font-black uppercase tracking-wider">Bebidas a servir</span>
+                    <span class="text-[10px] font-black uppercase tracking-wider">Bebidas y Postres</span>
                   </div>
                 ` : ''}
                 ${drinks.map(d => {
